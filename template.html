@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EASTEND 주간 매출 현황 대시보드</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ========== RESET & GLOBAL ========== */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { font-size:15px; }
+body {
+  font-family:'Noto Sans KR', sans-serif;
+  background:#F0F2F5;
+  color:#1a1a1a;
+  min-height:100vh;
+}
+
+/* ========== HEADER ========== */
+.header {
+  background:linear-gradient(135deg, #0F1B3D 0%, #1B2E5C 100%);
+  padding:24px 32px 0;
+  position:sticky; top:0; z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.25);
+}
+.header-top {
+  display:flex; align-items:center; justify-content:space-between;
+  padding-bottom:16px;
+}
+.logo {
+  font-size:1.5rem; font-weight:900; color:#fff; letter-spacing:1px;
+}
+.logo span { color:#4A90D9; }
+.header-date {
+  color:rgba(255,255,255,.6); font-size:.85rem;
+}
+
+/* ========== TABS ========== */
+.tab-row { display:flex; gap:4px; }
+.main-tabs { margin-bottom:2px; }
+.sub-tabs { background:rgba(255,255,255,.06); border-radius:8px 8px 0 0; padding:4px 4px 0; }
+.tab-btn {
+  padding:10px 28px; border:none; background:transparent;
+  color:rgba(255,255,255,.55); font-family:inherit; font-size:.95rem; font-weight:500;
+  cursor:pointer; border-radius:6px 6px 0 0; transition:all .2s;
+  position:relative;
+}
+.tab-btn:hover { color:rgba(255,255,255,.85); background:rgba(255,255,255,.06); }
+.tab-btn.active {
+  color:#fff; font-weight:700; background:rgba(255,255,255,.12);
+}
+.tab-btn.active::after {
+  content:''; position:absolute; bottom:0; left:20%; width:60%; height:3px;
+  background:#4A90D9; border-radius:3px 3px 0 0;
+}
+.main-tabs .tab-btn.active { background:rgba(74,144,217,.18); }
+
+/* ========== CONTENT ========== */
+.content { max-width:1400px; margin:0 auto; padding:24px 24px 48px; }
+
+/* ========== SECTION ========== */
+.section {
+  background:#fff; border-radius:12px; margin-bottom:20px;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);
+  overflow:hidden;
+}
+.section-header {
+  padding:16px 24px; font-size:1.1rem; font-weight:700; color:#0F1B3D;
+  border-bottom:2px solid #E8EBF0;
+  display:flex; align-items:center; gap:8px;
+}
+.section-header .badge {
+  display:inline-block; background:#4A90D9; color:#fff; font-size:.7rem; font-weight:600;
+  padding:2px 8px; border-radius:10px; letter-spacing:.5px;
+}
+.section-body { padding:20px 24px; overflow-x:auto; }
+
+/* ========== SUMMARY TABLE (Section 1) ========== */
+.summary-wrap { margin-bottom:24px; }
+.summary-wrap:last-child { margin-bottom:0; }
+.summary-label {
+  font-size:.95rem; font-weight:600; color:#1B2E5C; margin-bottom:8px;
+  padding-left:4px;
+}
+
+table.summary {
+  width:100%; border-collapse:collapse;
+}
+table.summary th, table.summary td {
+  border:1px solid #D8DCE3; padding:11px 14px; text-align:center;
+  font-size:.9rem; vertical-align:middle;
+}
+table.summary th {
+  background:#F5F7FA; font-weight:600; color:#1B2E5C;
+}
+.summary .big-num {
+  font-size:1.45rem; font-weight:800; color:#0F1B3D;
+}
+.summary .highlight-blue {
+  color:#4A90D9; font-weight:700; font-size:1.2rem;
+}
+.summary .sub-cell {
+  text-align:left; padding:14px 16px; line-height:1;
+}
+.summary .sub-cell .row-item {
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:.92rem; padding:6px 0;
+}
+.summary .sub-cell .row-item + .row-item {
+  border-top:1px dashed #E0E3E8;
+}
+.summary .sub-cell .row-item .label {
+  color:#666; font-size:.85rem; min-width:72px;
+}
+.summary .sub-cell .row-item .value {
+  font-weight:700; color:#0F1B3D; font-size:1rem; text-align:right;
+}
+.summary .sub-cell .row-item.pct .value {
+  font-size:.95rem; font-weight:700;
+}
+.summary .sub-cell .row-item.pct .value.pct-up { color:#E53935; }
+.summary .sub-cell .row-item.pct .value.pct-down { color:#1E88E5; }
+
+/* ========== DATA TABLE ========== */
+table.data-tbl {
+  width:100%; border-collapse:collapse; white-space:nowrap;
+}
+table.data-tbl th, table.data-tbl td {
+  border:1px solid #D8DCE3; padding:9px 11px; font-size:.88rem;
+  vertical-align:middle;
+}
+table.data-tbl th {
+  background:#F5F7FA; font-weight:600; color:#1B2E5C; text-align:center;
+}
+table.data-tbl td { text-align:right; }
+table.data-tbl td.left { text-align:left; }
+table.data-tbl td.center { text-align:center; }
+table.data-tbl .row-brand {
+  background:#FAFBFC; font-weight:600; color:#0F1B3D;
+}
+table.data-tbl .row-sub { background:#fff; }
+table.data-tbl .row-total {
+  background:#EDF1F7; font-weight:700;
+}
+.pct-up { color:#E53935; font-weight:600; }
+.pct-down { color:#1E88E5; font-weight:600; }
+.row-depth0 td:first-child { font-weight:700; color:#0F1B3D; }
+.row-depth1 td.left { padding-left:20px; font-weight:600; }
+.row-depth2 td.left { padding-left:36px; font-weight:500; color:#444; }
+.row-depth3 td.left { padding-left:52px; color:#555; }
+
+/* ========== SUBTOTAL ROW COLORS (all views unified) ========== */
+tr.subtotal-depth0 { background:#0F1B3D !important; }
+tr.subtotal-depth0 td { color:#fff !important; font-weight:700; }
+tr.subtotal-depth0 td.pct-up { color:#FF8A80 !important; }
+tr.subtotal-depth0 td.pct-down { color:#82B1FF !important; }
+tr.subtotal-depth1 { background:#1B2E5C !important; }
+tr.subtotal-depth1 td { color:#fff !important; font-weight:700; }
+tr.subtotal-depth1 td.pct-up { color:#FF8A80 !important; }
+tr.subtotal-depth1 td.pct-down { color:#82B1FF !important; }
+tr.subtotal-depth2 { background:#E8EDF5 !important; }
+tr.subtotal-depth2 td { color:#1B2E5C !important; font-weight:600; }
+
+/* ========== CHART ========== */
+.chart-container {
+  position:relative; width:100%; height:400px;
+}
+/* S3 body: flex layout for Y-axis fixed + chart scroll */
+.s3-body { display:flex; position:relative; }
+.s3-y-axis {
+  display:none; /* hidden on desktop, shown on mobile */
+}
+.s3-scroll { flex:1; min-width:0; }
+.chart-day-btn {
+  font-family:'Noto Sans KR', sans-serif;
+  font-size:.82rem; font-weight:500; padding:6px 16px;
+  border:1px solid #CDD1D9; border-radius:6px;
+  background:#fff; color:#666; cursor:pointer;
+  transition:all .2s;
+}
+.chart-day-btn:hover { border-color:#4A90D9; color:#4A90D9; }
+.chart-day-btn.active {
+  background:#1B2E5C; color:#fff; border-color:#1B2E5C; font-weight:700;
+}
+
+/* ========== FILTER TOOLBAR ========== */
+.filter-toolbar {
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  margin-bottom:16px; padding:12px 16px;
+  background:#F8F9FB; border-radius:8px; border:1px solid #E8EBF0;
+}
+.filter-group {
+  display:flex; align-items:center; gap:6px;
+}
+.filter-group label {
+  font-size:.8rem; font-weight:600; color:#1B2E5C; white-space:nowrap;
+}
+.filter-group select, .filter-group input[type="text"] {
+  font-family:'Noto Sans KR', sans-serif;
+  font-size:.8rem; padding:6px 10px;
+  border:1px solid #CDD1D9; border-radius:6px; background:#fff;
+  color:#1a1a1a; outline:none; transition:border-color .2s;
+}
+.filter-group select:focus, .filter-group input[type="text"]:focus {
+  border-color:#4A90D9;
+}
+.filter-group select { min-width:130px; cursor:pointer; }
+.filter-group input[type="text"] { width:180px; }
+
+.channel-picker {
+  position:relative; display:inline-block;
+}
+.channel-picker-btn {
+  font-family:'Noto Sans KR', sans-serif;
+  font-size:.8rem; padding:6px 12px;
+  border:1px solid #CDD1D9; border-radius:6px; background:#fff;
+  color:#1a1a1a; cursor:pointer; min-width:180px; text-align:left;
+  display:flex; align-items:center; justify-content:space-between; gap:6px;
+  transition:border-color .2s;
+}
+.channel-picker-btn:hover, .channel-picker-btn.open {
+  border-color:#4A90D9;
+}
+.channel-picker-btn .arrow { font-size:.6rem; color:#888; }
+.channel-picker-panel {
+  display:none; position:absolute; top:100%; left:0; z-index:50;
+  background:#fff; border:1px solid #D8DCE3; border-radius:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,.12); padding:8px 0;
+  max-height:320px; overflow-y:auto; min-width:240px;
+  margin-top:4px;
+}
+.channel-picker-panel.show { display:block; }
+.channel-picker-panel .cp-actions {
+  display:flex; gap:6px; padding:4px 12px 8px; border-bottom:1px solid #EEE;
+}
+.channel-picker-panel .cp-actions button {
+  font-family:'Noto Sans KR', sans-serif;
+  font-size:.72rem; padding:3px 10px; border:1px solid #CDD1D9;
+  border-radius:4px; background:#F8F9FB; cursor:pointer; color:#1B2E5C;
+  transition:all .15s;
+}
+.channel-picker-panel .cp-actions button:hover {
+  background:#4A90D9; color:#fff; border-color:#4A90D9;
+}
+.cp-item {
+  display:flex; align-items:center; gap:8px;
+  padding:5px 12px; cursor:pointer; font-size:.8rem;
+  transition:background .1s;
+}
+.cp-item:hover { background:#F0F4FA; }
+.cp-item input[type="checkbox"] {
+  accent-color:#4A90D9; width:15px; height:15px; cursor:pointer;
+}
+.cp-item.depth-0 { font-weight:700; color:#0F1B3D; }
+.cp-item.depth-1 { padding-left:24px; font-weight:600; color:#1B2E5C; }
+.cp-item.depth-2 { padding-left:36px; color:#444; }
+.cp-item.depth-3 { padding-left:48px; color:#666; font-size:.78rem; }
+
+.filter-count {
+  font-size:.75rem; color:#4A90D9; font-weight:500;
+}
+.btn-reset-filter {
+  font-family:'Noto Sans KR', sans-serif;
+  font-size:.78rem; padding:6px 14px;
+  border:1px solid #CDD1D9; border-radius:6px; background:#fff;
+  cursor:pointer; color:#666; transition:all .15s;
+}
+.btn-reset-filter:hover {
+  background:#E53935; color:#fff; border-color:#E53935;
+}
+
+/* ========== S1 MOBILE CARD COMPONENTS (hidden on desktop) ========== */
+.s1-mobile { display:none; }
+
+.mk-hero {
+  background:linear-gradient(135deg, #0F1B3D 0%, #1B2E5C 100%);
+  border-radius:8px; padding:16px; text-align:center; margin-bottom:8px;
+}
+.mk-hero-label { color:rgba(255,255,255,.7); font-size:.92rem; font-weight:500; margin-bottom:6px; }
+.mk-hero-label span { font-size:.78rem; font-weight:400; }
+.mk-hero-value { color:#fff; font-size:1.6rem; font-weight:800; letter-spacing:.5px; }
+
+.mk-sub-row { display:flex; gap:6px; margin-bottom:10px; }
+.mk-sub-item {
+  flex:1; background:#F5F7FA; border:1px solid #E8EBF0; border-radius:6px;
+  padding:10px 8px; text-align:center;
+}
+.mk-sub-label { font-size:.82rem; color:#666; margin-bottom:3px; font-weight:500; }
+.mk-sub-value { font-size:1.05rem; font-weight:700; color:#0F1B3D; }
+.mk-progress .mk-sub-value { font-size:1.2rem; }
+
+.mc-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.mc-card {
+  border:1px solid #D8DCE3; border-radius:8px; padding:12px;
+  background:#fff;
+}
+.mc-title {
+  font-size:.88rem; font-weight:700; color:#1B2E5C;
+  margin-bottom:8px; padding-bottom:5px; border-bottom:1px solid #E8EBF0;
+}
+.mc-row {
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:.88rem; padding:4px 0;
+}
+.mc-row + .mc-row { border-top:1px dashed #EEE; }
+.mc-label { color:#666; font-size:.8rem; }
+.mc-val { font-weight:700; color:#0F1B3D; font-size:.78rem; }
+
+/* ========== RESPONSIVE ========== */
+
+/* ---- Tablet ---- */
+@media(max-width:1024px) {
+  .content { max-width:100%; padding:20px 16px 40px; }
+  .section-body { padding:16px; }
+  table.summary th, table.summary td { padding:8px 10px; font-size:.8rem; }
+  .summary .big-num { font-size:1.15rem; }
+  .summary .highlight-blue { font-size:1.05rem; }
+  .summary .sub-cell .row-item .label { font-size:.75rem; min-width:60px; }
+  .summary .sub-cell .row-item .value { font-size:.85rem; }
+}
+
+/* ---- Mobile (≤768px) ---- */
+@media(max-width:768px) {
+  html { font-size:15px; }
+
+  /* --- Header --- */
+  .header { padding:12px 12px 0; }
+  .header-top { padding-bottom:8px; }
+  .logo { font-size:1.2rem; }
+  .header-date { font-size:.85rem; }
+
+  /* --- Tabs: scrollable pills --- */
+  .tab-row { overflow-x:auto; -webkit-overflow-scrolling:touch; flex-wrap:nowrap; gap:2px; scrollbar-width:none; }
+  .tab-row::-webkit-scrollbar { display:none; }
+  .tab-btn { padding:9px 18px; font-size:.9rem; white-space:nowrap; flex-shrink:0; }
+  .sub-tabs { padding:3px 3px 0; }
+
+  /* --- Content --- */
+  .content { padding:12px 8px 32px; }
+
+  /* --- Sections --- */
+  .section { border-radius:8px; margin-bottom:12px; }
+  .section-header { padding:12px 14px; font-size:1rem; flex-wrap:wrap; gap:6px; }
+  .section-header .badge { font-size:.72rem; padding:3px 8px; }
+  .section-body { padding:12px 10px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+  /* ===== S1: Toggle desktop/mobile ===== */
+  .s1-desktop { display:none; }
+  .s1-mobile { display:block; }
+  .summary-label { font-size:.95rem; margin-bottom:8px; }
+
+  /* ===== S2 & S4: horizontal scroll + sticky columns ===== */
+  table.data-tbl {
+    min-width:750px;
+    border-collapse:separate; border-spacing:0;
+  }
+  /* Fix double borders in separate mode: remove all, add right+bottom only */
+  table.data-tbl th, table.data-tbl td {
+    padding:8px 10px; font-size:.95rem;
+    border:none;
+    border-right:1px solid #D8DCE3;
+    border-bottom:1px solid #D8DCE3;
+  }
+  /* First row of thead needs top border */
+  table.data-tbl thead tr:first-child th { border-top:1px solid #D8DCE3; }
+  /* First column needs left border */
+  table.data-tbl th:first-child, table.data-tbl td:first-child { border-left:1px solid #D8DCE3; }
+
+  .row-depth1 td.left { padding-left:16px; }
+  .row-depth2 td.left { padding-left:28px; }
+  .row-depth3 td.left { padding-left:40px; }
+
+  /* ---- Sticky left columns ---- */
+  .scol { position:sticky; z-index:2; }
+  .scol-1 { left:0; min-width:60px; }
+  .scol-2 { left:60px; min-width:90px; }
+  th.scol { z-index:3; background:#F5F7FA; }
+  td.scol { background:#fff; }
+  /* Sticky bg overrides for S2 row types */
+  tr.row-total td.scol { background:#EDF1F7; }
+  tr.row-sub td.scol { background:#fff; }
+  /* Sticky bg overrides for S4 subtotal rows */
+  tr.subtotal-depth0 td.scol { background:#0F1B3D !important; }
+  tr.subtotal-depth1 td.scol { background:#1B2E5C !important; }
+  tr.subtotal-depth2 td.scol { background:#E8EDF5 !important; }
+  /* Ensure sticky border-right visible over scrolling cells */
+  .scol { border-right:1px solid #C0C5CE !important; }
+  /* Shadow on right edge of outermost sticky col */
+  .scol-1::after, .scol-2::after {
+    content:''; position:absolute; top:0; right:-6px; bottom:0; width:6px;
+    background:linear-gradient(to right,rgba(0,0,0,.1),transparent);
+    pointer-events:none;
+  }
+
+  /* ===== S3 Chart: fixed Y-axis + scrollable chart ===== */
+  .s3-body.section-body {
+    display:flex !important; flex-direction:row !important;
+    overflow:hidden !important; /* BLOCK parent overflow-x:auto */
+    padding:10px 0 10px 0;
+  }
+  .s3-y-axis {
+    display:flex !important; flex-direction:column; justify-content:space-between;
+    width:50px; flex-shrink:0; z-index:3;
+    padding:32px 6px 40px 8px;
+    text-align:right; font-size:.82rem; color:#555; font-weight:500;
+    background:#fff; border-right:2px solid #D8DCE3;
+    box-shadow:4px 0 8px rgba(0,0,0,.06);
+  }
+  .s3-y-axis .y-title {
+    font-size:.72rem; color:#999; text-align:center;
+    margin-bottom:4px; font-weight:600;
+  }
+  .s3-y-axis .y-tick { line-height:1.2; white-space:nowrap; }
+  .s3-scroll {
+    flex:1; min-width:0;
+    overflow-x:auto !important; -webkit-overflow-scrolling:touch;
+  }
+  .s3-scroll .chart-container { min-width:1600px; height:420px; }
+  .chart-day-btn { font-size:.88rem; padding:6px 14px; }
+
+  /* ===== S4 Filter ===== */
+  .filter-toolbar { padding:8px 10px; gap:8px; flex-direction:column; align-items:stretch; }
+  .filter-group { flex-wrap:wrap; gap:4px; }
+  .filter-group select { min-width:100%; font-size:.9rem; }
+  .filter-group input[type="text"] { width:100%; font-size:.9rem; }
+  .filter-group label { font-size:.88rem; width:100%; }
+  .channel-picker-btn { min-width:100%; font-size:.9rem; }
+  .channel-picker-panel { min-width:280px; }
+  .btn-reset-filter { font-size:.88rem; padding:7px 14px; align-self:flex-start; }
+  .filter-count { font-size:.85rem; }
+}
+
+/* ---- Small phone (≤420px) ---- */
+@media(max-width:420px) {
+  html { font-size:14px; }
+  .header { padding:10px 8px 0; }
+  .logo { font-size:1rem; }
+  .tab-btn { padding:8px 14px; font-size:.82rem; }
+  .content { padding:8px 5px 24px; }
+  .section-header { padding:10px 10px; font-size:.92rem; }
+  .section-body { padding:8px 6px; }
+
+  /* S1 mobile cards: keep 2x2 grid */
+  .mc-grid { grid-template-columns:1fr 1fr; gap:6px; }
+  .mc-card { padding:9px; }
+  .mc-title { font-size:.82rem; }
+  .mc-row { font-size:.82rem; }
+  .mc-label { font-size:.74rem; }
+  .mk-hero-value { font-size:1.4rem; }
+  .mk-sub-value { font-size:1rem; }
+
+  table.data-tbl { min-width:650px; }
+  table.data-tbl th, table.data-tbl td { font-size:.88rem; padding:7px 8px; }
+  .s3-scroll .chart-container { min-width:1400px; height:380px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div class="header-top">
+    <div class="logo">EAST<span>END</span> &nbsp;주간 매출 현황</div>
+    <div class="header-date" id="headerDate"></div>
+  </div>
+  <div class="main-tabs tab-row" id="mainTabs"></div>
+  <div class="sub-tabs tab-row" id="subTabs"></div>
+</div>
+
+<!-- ===== CONTENT ===== -->
+<div class="content" id="dashboardContent"></div>
+
+<script>
+// ============================================================
+// ★ GAS 자동 주입 데이터
+// 기본값 = 미리보기용 (브라우저에서 직접 열어도 에러 없음)
+// GAS 실행 시 아래 줄이 실제 데이터로 자동 치환됩니다
+// ============================================================
+const DATA = {"total":{"s1":{"revenue":{"cumulative":1002561309,"target":2534700000,"progress":40,"m2cum":843386223,"m2pct":119,"m2total":1837086985,"m1cum":911087429,"m1pct":110,"m1total":2043378628,"m12cum":1436573387,"m12pct":70,"m12total":2665096777,"ly3cum":908656744,"ly3pct":110,"ly3total":1756450948},"transaction":{"cumulative":1232376054,"target":3163000000,"progress":39,"m2cum":1040871334,"m2pct":118,"m2total":2265886749,"m1cum":1125584018,"m1pct":109,"m1total":2531179263,"m12cum":1811758051,"m12pct":68,"m12total":3291355707,"ly3cum":1123168736,"ly3pct":110,"ly3total":2160672997}},"s2":{"dates_cw":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"dates_pw":["3.2(월)","3.3(화)","3.4(수)","3.5(목)","3.6(금)","3.7(토)","3.8(일)"],"rows":[{"label":"금주","type":"total","data":[138197181,106651708,110732324,108163784,0,0,0,463744997]},{"label":"시티브리즈","type":"brand","parent":"cw","data":[105840041,77785745,77646182,73669272,0,0,0,334941240]},{"label":"아티드","type":"brand","parent":"cw","data":[32357140,28865963,33086142,34494512,0,0,0,128803757]},{"label":"전주","type":"total","data":[130815109,61880916,67629914,71157547,76438465,118773727,218799273,745494951]},{"label":"시티브리즈","type":"brand","parent":"pw","data":[117479509,56711916,60757614,65544087,66202965,105962027,203102973,675761091]},{"label":"아티드","type":"brand","parent":"pw","data":[13335600,5169000,6872300,5613460,10235500,12811700,15696300,69733860]},{"label":"전주비","type":"pct","data":[106,172,164,152,0,0,0,62]},{"label":"시티브리즈","type":"pct-brand","data":[90,137,128,112,0,0,0,50]},{"label":"아티드","type":"pct-brand","data":[243,558,481,614,0,0,0,185]}]},"s4":{"dates":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"channels":[{"depth":0,"label":"전체","data":[138197181,106651708,110732324,108163784,0,0,0,463744997,994772724,47]},{"depth":0,"label":"오프라인","data":[17686700,24120930,27251520,24388000,0,0,0,93447150,352884940,135]},{"depth":1,"label":"시티브리즈","data":[13545000,18695430,21020320,20348600,0,0,0,73609350,273626840,130]},{"depth":2,"label":"정상","data":[8441400,14678130,17251520,15621600,0,0,0,55992650,194368740,114]},{"depth":3,"label":"더현대서울","data":[955300,1758900,2705900,2306400,0,0,0,7726500,26765400,104]},{"depth":3,"label":"롯데 노원점","data":[326600,256900,380500,635700,0,0,0,1599700,7822100,113]},{"depth":3,"label":"롯데 대전점","data":[0,1273530,847920,75300,0,0,0,2196750,6265640,174]},{"depth":3,"label":"롯데 부산본점","data":[0,1108600,1348100,1143400,0,0,0,3600100,16199100,259]},{"depth":3,"label":"롯데 안산점","data":[0,806200,1040500,991200,0,0,0,2837900,5154000,82]},{"depth":3,"label":"롯데 인천점","data":[0,2034900,1607500,1533300,0,0,0,5175700,15832200,139]},{"depth":3,"label":"롯데월드몰","data":[3916700,3858400,4937800,4080400,0,0,0,16793300,45558800,101]},{"depth":3,"label":"신세계 대전점","data":[635300,121800,0,236700,0,0,0,993800,7567500,102]},{"depth":3,"label":"신세계 의정부점","data":[695500,495100,468000,255000,0,0,0,1913600,7912900,117]},{"depth":3,"label":"한남FSS","data":[442800,902100,283700,823300,0,0,0,2451900,8342100,66]},{"depth":3,"label":"현대 울산점","data":[233000,348900,290900,203100,0,0,0,1075900,8457900,64]},{"depth":3,"label":"현대 중동점","data":[251600,431300,925100,1017600,0,0,0,2625600,6728800,145]},{"depth":3,"label":"현대 천호점","data":[179500,430600,453000,143800,0,0,0,1206900,3850700,155]},{"depth":3,"label":"현대 킨텍스점","data":[170400,71800,873900,208600,0,0,0,1324700,5276100,148]},{"depth":3,"label":"현대 판교점","data":[634700,779100,1088700,1967800,0,0,0,4470300,22635500,140]},{"depth":2,"label":"아울렛","data":[3667900,2830700,2123500,3869300,0,0,0,12491400,43921500,128]},{"depth":3,"label":"현대 송도","data":[1991300,1479700,1136600,2169600,0,0,0,6777200,18380800,137]},{"depth":3,"label":"커넥트부산","data":[783000,545500,459100,233800,0,0,0,2021400,5030900,84]},{"depth":3,"label":"신세계 파주점","data":[35600,172700,79900,841400,0,0,0,1129600,6054800,212]},{"depth":3,"label":"롯데 동부산점","data":[557700,402500,378500,484600,0,0,0,1823300,7925800,107]},{"depth":3,"label":"더팩토리 기흥점","data":[300300,230300,69400,139900,0,0,0,739900,6529200,132]},{"depth":2,"label":"행사","data":[1435700,1186600,1645300,857700,0,0,0,5125300,35336600,0]},{"depth":1,"label":"아티드","data":[4141700,5425500,6231200,4039400,0,0,0,19837800,69733860,156]},{"depth":2,"label":"정상","data":[2016100,3990500,4724200,2786000,0,0,0,13516800,50051160,170]},{"depth":3,"label":"롯데 부산본점","data":[0,1324200,1391700,859600,0,0,0,3575500,12470060,317]},{"depth":3,"label":"신세계 의정부점","data":[313300,1954700,1356900,1013400,0,0,0,4638300,12956800,206]},{"depth":3,"label":"신세계 타임점","data":[111900,0,259500,211500,0,0,0,582900,5833400,115]},{"depth":3,"label":"현대 판교점","data":[1590900,711600,1716100,701500,0,0,0,4720100,18790900,126]},{"depth":2,"label":"아울렛","data":[0,123200,125100,0,0,0,0,248300,1131700,49]},{"depth":3,"label":"더팩토리 기흥점","data":[0,123200,125100,0,0,0,0,248300,1131700,49]},{"depth":2,"label":"행사","data":[2125600,1311800,1381900,1253400,0,0,0,6072700,18551000,138]},{"depth":0,"label":"온라인","data":[120510481,82530778,83480804,83775784,0,0,0,370297847,641887784,135]},{"depth":1,"label":"시티브리즈","data":[92295041,59090315,56625862,53320672,0,0,0,261331890,402134251,65]},{"depth":2,"label":"자사몰","data":[5672675,5483390,6795275,10435300,0,0,0,28386640,58541145,48]},{"depth":2,"label":"W컨셉","data":[63729575,32505915,24531290,20882580,0,0,0,141649360,160886400,88]},{"depth":2,"label":"29cm","data":[9176050,9071730,13956270,10044720,0,0,0,42248770,94015040,45]},{"depth":2,"label":"지그재그","data":[2741970,2013670,3089950,2130910,0,0,0,9976500,18195350,55]},{"depth":2,"label":"무신사","data":[7110940,5985730,5303110,7254530,0,0,0,25654310,34254950,75]},{"depth":2,"label":"롯데온","data":[1947021,1328790,494127,411752,0,0,0,4181690,1379596,303]},{"depth":2,"label":"하고","data":[295500,577000,734260,529155,0,0,0,2135915,7345220,29]},{"depth":2,"label":"네이버","data":[249670,664450,645275,402715,0,0,0,1962110,1400630,140]},{"depth":2,"label":"EQL","data":[0,258700,245300,184230,0,0,0,688230,2248440,31]},{"depth":2,"label":"카카오선물하기","data":[0,0,0,0,0,0,0,0,0,0]},{"depth":2,"label":"브론테","data":[0,0,0,0,0,0,0,0,0,0]},{"depth":2,"label":"기타","data":[1371640,1200940,831005,1044780,0,0,0,4448365,23867480,19]},{"depth":1,"label":"아티드","data":[28215440,23440463,26854942,30455112,0,0,0,108965957,239753533,45]},{"depth":2,"label":"자사몰","data":[5384960,4302000,4783620,4735160,0,0,0,19205740,41190820,47]},{"depth":2,"label":"W컨셉","data":[15299900,5702115,5862340,8301960,0,0,0,35166315,108403440,32]},{"depth":2,"label":"29cm","data":[3464300,8653100,10042700,10675000,0,0,0,32835100,37329400,88]},{"depth":2,"label":"지그재그","data":[2208280,2078020,4222250,5243400,0,0,0,13751950,17017970,81]},{"depth":2,"label":"무신사","data":[709100,1410200,321100,1033800,0,0,0,3474200,4980900,70]},{"depth":2,"label":"롯데온","data":[123500,189828,92222,96792,0,0,0,502342,3232268,16]},{"depth":2,"label":"하고","data":[399700,796800,638600,239100,0,0,0,2074200,2129800,97]},{"depth":2,"label":"네이버","data":[165250,113100,293910,0,0,0,0,572260,278400,206]},{"depth":2,"label":"EQL","data":[221500,195300,449800,129900,0,0,0,996500,934800,107]},{"depth":2,"label":"카카오선물하기","data":[0,0,0,0,0,0,0,0,0,0]},{"depth":2,"label":"브론테","data":[0,0,0,0,0,0,0,0,21952400,0]},{"depth":2,"label":"기타","data":[238950,0,148400,0,0,0,0,387350,2303335,17]}]}},"offline":{"s1":{"revenue":{"cumulative":469675611,"target":974700000,"progress":48,"m2cum":376396335,"m2pct":125,"m2total":826031538,"m1cum":401396490,"m1pct":117,"m1total":869965083,"m12cum":466529094,"m12pct":101,"m12total":1179479979,"ly3cum":397681148,"ly3pct":118,"ly3total":815677205},"transaction":{"cumulative":521861790,"target":1083000000,"progress":48,"m2cum":418218150,"m2pct":125,"m2total":917812820,"m1cum":445996100,"m1pct":117,"m1total":966627870,"m12cum":518365660,"m12pct":101,"m12total":1310533310,"ly3cum":441867942,"ly3pct":118,"ly3total":906308006}},"s2":{"dates_cw":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"dates_pw":["3.2(월)","3.3(화)","3.4(수)","3.5(목)","3.6(금)","3.7(토)","3.8(일)"],"rows":[{"label":"금주","type":"total","data":[17686700,24120930,27251520,24388000,0,0,0,93447150]},{"label":"시티브리즈","type":"brand","parent":"cw","data":[13545000,18695430,21020320,20348600,0,0,0,73609350]},{"label":"아티드","type":"brand","parent":"cw","data":[4141700,5425500,6231200,4039400,0,0,0,19837800]},{"label":"전주","type":"total","data":[66227100,21336500,24582100,27954100,42143200,80929550,80188150,343360700]},{"label":"시티브리즈","type":"brand","parent":"pw","data":[52891500,16167500,17709800,22340640,31907700,68117850,64491850,273626840]},{"label":"아티드","type":"brand","parent":"pw","data":[13335600,5169000,6872300,5613460,10235500,12811700,15696300,69733860]},{"label":"전주비","type":"pct","data":[27,113,111,87,0,0,0,27]},{"label":"시티브리즈","type":"pct-brand","data":[26,116,119,91,0,0,0,27]},{"label":"아티드","type":"pct-brand","data":[31,105,91,72,0,0,0,28]}]},"s4":{"dates":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"channels":[{"depth":0,"label":"오프라인","data":[17686700,24120930,27251520,24388000,0,0,0,93447150,352884940,135]},{"depth":1,"label":"시티브리즈","data":[13545000,18695430,21020320,20348600,0,0,0,73609350,273626840,130]},{"depth":2,"label":"정상","data":[8441400,14678130,17251520,15621600,0,0,0,55992650,194368740,114]},{"depth":3,"label":"더현대서울","data":[955300,1758900,2705900,2306400,0,0,0,7726500,26765400,104]},{"depth":3,"label":"롯데 노원점","data":[326600,256900,380500,635700,0,0,0,1599700,7822100,113]},{"depth":3,"label":"롯데 대전점","data":[0,1273530,847920,75300,0,0,0,2196750,6265640,174]},{"depth":3,"label":"롯데 부산본점","data":[0,1108600,1348100,1143400,0,0,0,3600100,16199100,259]},{"depth":3,"label":"롯데 안산점","data":[0,806200,1040500,991200,0,0,0,2837900,5154000,82]},{"depth":3,"label":"롯데 인천점","data":[0,2034900,1607500,1533300,0,0,0,5175700,15832200,139]},{"depth":3,"label":"롯데월드몰","data":[3916700,3858400,4937800,4080400,0,0,0,16793300,45558800,101]},{"depth":3,"label":"신세계 대전점","data":[635300,121800,0,236700,0,0,0,993800,7567500,102]},{"depth":3,"label":"신세계 의정부점","data":[695500,495100,468000,255000,0,0,0,1913600,7912900,117]},{"depth":3,"label":"한남FSS","data":[442800,902100,283700,823300,0,0,0,2451900,8342100,66]},{"depth":3,"label":"현대 울산점","data":[233000,348900,290900,203100,0,0,0,1075900,8457900,64]},{"depth":3,"label":"현대 중동점","data":[251600,431300,925100,1017600,0,0,0,2625600,6728800,145]},{"depth":3,"label":"현대 천호점","data":[179500,430600,453000,143800,0,0,0,1206900,3850700,155]},{"depth":3,"label":"현대 킨텍스점","data":[170400,71800,873900,208600,0,0,0,1324700,5276100,148]},{"depth":3,"label":"현대 판교점","data":[634700,779100,1088700,1967800,0,0,0,4470300,22635500,140]},{"depth":2,"label":"아울렛","data":[3667900,2830700,2123500,3869300,0,0,0,12491400,43921500,128]},{"depth":3,"label":"현대 송도","data":[1991300,1479700,1136600,2169600,0,0,0,6777200,18380800,137]},{"depth":3,"label":"커넥트부산","data":[783000,545500,459100,233800,0,0,0,2021400,5030900,84]},{"depth":3,"label":"신세계 파주점","data":[35600,172700,79900,841400,0,0,0,1129600,6054800,212]},{"depth":3,"label":"롯데 동부산점","data":[557700,402500,378500,484600,0,0,0,1823300,7925800,107]},{"depth":3,"label":"더팩토리 기흥점","data":[300300,230300,69400,139900,0,0,0,739900,6529200,132]},{"depth":2,"label":"행사","data":[1435700,1186600,1645300,857700,0,0,0,5125300,35336600,0]},{"depth":1,"label":"아티드","data":[4141700,5425500,6231200,4039400,0,0,0,19837800,69733860,156]},{"depth":2,"label":"정상","data":[2016100,3990500,4724200,2786000,0,0,0,13516800,50051160,170]},{"depth":3,"label":"롯데 부산본점","data":[0,1324200,1391700,859600,0,0,0,3575500,12470060,317]},{"depth":3,"label":"신세계 의정부점","data":[313300,1954700,1356900,1013400,0,0,0,4638300,12956800,206]},{"depth":3,"label":"신세계 타임점","data":[111900,0,259500,211500,0,0,0,582900,5833400,115]},{"depth":3,"label":"현대 판교점","data":[1590900,711600,1716100,701500,0,0,0,4720100,18790900,126]},{"depth":2,"label":"아울렛","data":[0,123200,125100,0,0,0,0,248300,1131700,49]},{"depth":3,"label":"더팩토리 기흥점","data":[0,123200,125100,0,0,0,0,248300,1131700,49]},{"depth":2,"label":"행사","data":[2125600,1311800,1381900,1253400,0,0,0,6072700,18551000,138]}]}},"online":{"s1":{"revenue":{"cumulative":532885698,"target":1560000000,"progress":34,"m2cum":466989888,"m2pct":114,"m2total":1011055447,"m1cum":509690939,"m1pct":105,"m1total":1173413545,"m12cum":970044293,"m12pct":55,"m12total":1485616798,"ly3cum":510975596,"ly3pct":104,"ly3total":940773743},"transaction":{"cumulative":710514264,"target":2080000000,"progress":34,"m2cum":622653184,"m2pct":114,"m2total":1348073929,"m1cum":679587918,"m1pct":105,"m1total":1564551393,"m12cum":1293392391,"m12pct":55,"m12total":1980822397,"ly3cum":681300794,"ly3pct":104,"ly3total":1254364991}},"s2":{"dates_cw":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"dates_pw":["3.2(월)","3.3(화)","3.4(수)","3.5(목)","3.6(금)","3.7(토)","3.8(일)"],"rows":[{"label":"금주","type":"total","data":[120510481,82530778,83480804,83775784,0,0,0,370297847]},{"label":"시티브리즈","type":"brand","parent":"cw","data":[92295041,59090315,56625862,53320672,0,0,0,261331890]},{"label":"아티드","type":"brand","parent":"cw","data":[28215440,23440463,26854942,30455112,0,0,0,108965957]},{"label":"전주","type":"total","data":[64588009,40544416,43047814,43203447,34295265,37844177,138611123,402134251]},{"label":"시티브리즈","type":"brand","parent":"pw","data":[64588009,40544416,43047814,43203447,34295265,37844177,138611123,402134251]},{"label":"아티드","type":"brand","parent":"pw","data":[0,0,0,0,0,0,0,0]},{"label":"전주비","type":"pct","data":[77,69,59,119,70,89,105,81]},{"label":"시티브리즈","type":"pct-brand","data":[77,69,59,119,70,89,105,81]},{"label":"아티드","type":"pct-brand","data":[0,0,0,0,0,0,0,0]}]},"s4":{"dates":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"channels":[{"depth":0,"label":"온라인","data":[120510481,82530778,83480804,83775784,0,0,0,370297847,641887784,135]},{"depth":1,"label":"시티브리즈","data":[92295041,59090315,56625862,53320672,0,0,0,261331890,402134251,65]},{"depth":2,"label":"자사몰","data":[5672675,5483390,6795275,10435300,0,0,0,28386640,58541145,48]},{"depth":2,"label":"W컨셉","data":[63729575,32505915,24531290,20882580,0,0,0,141649360,160886400,88]},{"depth":2,"label":"29cm","data":[9176050,9071730,13956270,10044720,0,0,0,42248770,94015040,45]},{"depth":2,"label":"지그재그","data":[2741970,2013670,3089950,2130910,0,0,0,9976500,18195350,55]},{"depth":2,"label":"무신사","data":[7110940,5985730,5303110,7254530,0,0,0,25654310,34254950,75]},{"depth":2,"label":"롯데온","data":[1947021,1328790,494127,411752,0,0,0,4181690,1379596,303]},{"depth":2,"label":"하고","data":[295500,577000,734260,529155,0,0,0,2135915,7345220,29]},{"depth":2,"label":"네이버","data":[249670,664450,645275,402715,0,0,0,1962110,1400630,140]},{"depth":2,"label":"EQL","data":[0,258700,245300,184230,0,0,0,688230,2248440,31]},{"depth":2,"label":"카카오선물하기","data":[0,0,0,0,0,0,0,0,0,0]},{"depth":2,"label":"브론테","data":[0,0,0,0,0,0,0,0,0,0]},{"depth":2,"label":"기타","data":[1371640,1200940,831005,1044780,0,0,0,4448365,23867480,19]},{"depth":1,"label":"아티드","data":[28215440,23440463,26854942,30455112,0,0,0,108965957,239753533,45]},{"depth":2,"label":"자사몰","data":[5384960,4302000,4783620,4735160,0,0,0,19205740,41190820,47]},{"depth":2,"label":"W컨셉","data":[15299900,5702115,5862340,8301960,0,0,0,35166315,108403440,32]},{"depth":2,"label":"29cm","data":[3464300,8653100,10042700,10675000,0,0,0,32835100,37329400,88]},{"depth":2,"label":"지그재그","data":[2208280,2078020,4222250,5243400,0,0,0,13751950,17017970,81]},{"depth":2,"label":"무신사","data":[709100,1410200,321100,1033800,0,0,0,3474200,4980900,70]},{"depth":2,"label":"롯데온","data":[123500,189828,92222,96792,0,0,0,502342,3232268,16]},{"depth":2,"label":"하고","data":[399700,796800,638600,239100,0,0,0,2074200,2129800,97]},{"depth":2,"label":"네이버","data":[165250,113100,293910,0,0,0,0,572260,278400,206]},{"depth":2,"label":"EQL","data":[221500,195300,449800,129900,0,0,0,996500,934800,107]},{"depth":2,"label":"카카오선물하기","data":[0,0,0,0,0,0,0,0,0,0]},{"depth":2,"label":"브론테","data":[0,0,0,0,0,0,0,0,21952400,0]},{"depth":2,"label":"기타","data":[238950,0,148400,0,0,0,0,387350,2303335,17]}]}},"cb_off":{"s1":{"revenue":{"cumulative":469675611,"target":974700000,"progress":48,"m2cum":376396335,"m2pct":125,"m2total":826031538,"m1cum":401396490,"m1pct":117,"m1total":869965083,"m12cum":466529094,"m12pct":101,"m12total":1179479979,"ly3cum":397681148,"ly3pct":118,"ly3total":815677205},"transaction":{"cumulative":521861790,"target":1083000000,"progress":48,"m2cum":418218150,"m2pct":125,"m2total":917812820,"m1cum":445996100,"m1pct":117,"m1total":966627870,"m12cum":518365660,"m12pct":101,"m12total":1310533310,"ly3cum":441867942,"ly3pct":118,"ly3total":906308006}},"s2":{"dates_cw":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"dates_pw":["3.2(월)","3.3(화)","3.4(수)","3.5(목)","3.6(금)","3.7(토)","3.8(일)"],"rows":[{"label":"금주","type":"total","data":[17686700,24120930,27251520,24388000,0,0,0,93447150]},{"label":"시티브리즈","type":"brand","parent":"cw","data":[13545000,18695430,21020320,20348600,0,0,0,73609350]},{"label":"아티드","type":"brand","parent":"cw","data":[4141700,5425500,6231200,4039400,0,0,0,19837800]},{"label":"전주","type":"total","data":[66227100,21336500,24582100,27954100,42143200,80929550,80188150,343360700]},{"label":"시티브리즈","type":"brand","parent":"pw","data":[52891500,16167500,17709800,22340640,31907700,68117850,64491850,273626840]},{"label":"아티드","type":"brand","parent":"pw","data":[13335600,5169000,6872300,5613460,10235500,12811700,15696300,69733860]},{"label":"전주비","type":"pct","data":[27,113,111,87,0,0,0,27]},{"label":"시티브리즈","type":"pct-brand","data":[26,116,119,91,0,0,0,27]},{"label":"아티드","type":"pct-brand","data":[31,105,91,72,0,0,0,28]}]},"s4":{"dates":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"channels":[{"depth":0,"label":"시티브리즈","data":[13545000,18695430,21020320,20348600,0,0,0,73609350,273626840,130]},{"depth":1,"label":"정상","data":[8441400,14678130,17251520,15621600,0,0,0,55992650,194368740,114]},{"depth":2,"label":"더현대서울","data":[955300,1758900,2705900,2306400,0,0,0,7726500,26765400,104]},{"depth":2,"label":"롯데 노원점","data":[326600,256900,380500,635700,0,0,0,1599700,7822100,113]},{"depth":2,"label":"롯데 대전점","data":[0,1273530,847920,75300,0,0,0,2196750,6265640,174]},{"depth":2,"label":"롯데 부산본점","data":[0,1108600,1348100,1143400,0,0,0,3600100,16199100,259]},{"depth":2,"label":"롯데 안산점","data":[0,806200,1040500,991200,0,0,0,2837900,5154000,82]},{"depth":2,"label":"롯데 인천점","data":[0,2034900,1607500,1533300,0,0,0,5175700,15832200,139]},{"depth":2,"label":"롯데월드몰","data":[3916700,3858400,4937800,4080400,0,0,0,16793300,45558800,101]},{"depth":2,"label":"신세계 대전점","data":[635300,121800,0,236700,0,0,0,993800,7567500,102]},{"depth":2,"label":"신세계 의정부점","data":[695500,495100,468000,255000,0,0,0,1913600,7912900,117]},{"depth":2,"label":"한남FSS","data":[442800,902100,283700,823300,0,0,0,2451900,8342100,66]},{"depth":2,"label":"현대 울산점","data":[233000,348900,290900,203100,0,0,0,1075900,8457900,64]},{"depth":2,"label":"현대 중동점","data":[251600,431300,925100,1017600,0,0,0,2625600,6728800,145]},{"depth":2,"label":"현대 천호점","data":[179500,430600,453000,143800,0,0,0,1206900,3850700,155]},{"depth":2,"label":"현대 킨텍스점","data":[170400,71800,873900,208600,0,0,0,1324700,5276100,148]},{"depth":2,"label":"현대 판교점","data":[634700,779100,1088700,1967800,0,0,0,4470300,22635500,140]},{"depth":1,"label":"아울렛","data":[3667900,2830700,2123500,3869300,0,0,0,12491400,43921500,128]},{"depth":2,"label":"현대 송도","data":[1991300,1479700,1136600,2169600,0,0,0,6777200,18380800,137]},{"depth":2,"label":"커넥트부산","data":[783000,545500,459100,233800,0,0,0,2021400,5030900,84]},{"depth":2,"label":"신세계 파주점","data":[35600,172700,79900,841400,0,0,0,1129600,6054800,212]},{"depth":2,"label":"롯데 동부산점","data":[557700,402500,378500,484600,0,0,0,1823300,7925800,107]},{"depth":2,"label":"더팩토리 기흥점","data":[300300,230300,69400,139900,0,0,0,739900,6529200,132]},{"depth":1,"label":"행사","data":[1435700,1186600,1645300,857700,0,0,0,5125300,35336600,0]}]}},"at_off":{"s1":{"revenue":{"cumulative":469675611,"target":974700000,"progress":48,"m2cum":376396335,"m2pct":125,"m2total":826031538,"m1cum":401396490,"m1pct":117,"m1total":869965083,"m12cum":466529094,"m12pct":101,"m12total":1179479979,"ly3cum":397681148,"ly3pct":118,"ly3total":815677205},"transaction":{"cumulative":521861790,"target":1083000000,"progress":48,"m2cum":418218150,"m2pct":125,"m2total":917812820,"m1cum":445996100,"m1pct":117,"m1total":966627870,"m12cum":518365660,"m12pct":101,"m12total":1310533310,"ly3cum":441867942,"ly3pct":118,"ly3total":906308006}},"s2":{"dates_cw":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"dates_pw":["3.2(월)","3.3(화)","3.4(수)","3.5(목)","3.6(금)","3.7(토)","3.8(일)"],"rows":[{"label":"금주","type":"total","data":[17686700,24120930,27251520,24388000,0,0,0,93447150]},{"label":"시티브리즈","type":"brand","parent":"cw","data":[13545000,18695430,21020320,20348600,0,0,0,73609350]},{"label":"아티드","type":"brand","parent":"cw","data":[4141700,5425500,6231200,4039400,0,0,0,19837800]},{"label":"전주","type":"total","data":[66227100,21336500,24582100,27954100,42143200,80929550,80188150,343360700]},{"label":"시티브리즈","type":"brand","parent":"pw","data":[52891500,16167500,17709800,22340640,31907700,68117850,64491850,273626840]},{"label":"아티드","type":"brand","parent":"pw","data":[13335600,5169000,6872300,5613460,10235500,12811700,15696300,69733860]},{"label":"전주비","type":"pct","data":[27,113,111,87,0,0,0,27]},{"label":"시티브리즈","type":"pct-brand","data":[26,116,119,91,0,0,0,27]},{"label":"아티드","type":"pct-brand","data":[31,105,91,72,0,0,0,28]}]},"s4":{"dates":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"channels":[{"depth":0,"label":"아티드","data":[4141700,5425500,6231200,4039400,0,0,0,19837800,69733860,156]},{"depth":1,"label":"정상","data":[2016100,3990500,4724200,2786000,0,0,0,13516800,50051160,170]},{"depth":2,"label":"롯데 부산본점","data":[0,1324200,1391700,859600,0,0,0,3575500,12470060,317]},{"depth":2,"label":"신세계 의정부점","data":[313300,1954700,1356900,1013400,0,0,0,4638300,12956800,206]},{"depth":2,"label":"신세계 타임점","data":[111900,0,259500,211500,0,0,0,582900,5833400,115]},{"depth":2,"label":"현대 판교점","data":[1590900,711600,1716100,701500,0,0,0,4720100,18790900,126]},{"depth":1,"label":"아울렛","data":[0,123200,125100,0,0,0,0,248300,1131700,49]},{"depth":2,"label":"더팩토리 기흥점","data":[0,123200,125100,0,0,0,0,248300,1131700,49]},{"depth":1,"label":"행사","data":[2125600,1311800,1381900,1253400,0,0,0,6072700,18551000,138]}]}},"cb_on":{"s1":{"revenue":{"cumulative":532885698,"target":1560000000,"progress":34,"m2cum":466989888,"m2pct":114,"m2total":1011055447,"m1cum":509690939,"m1pct":105,"m1total":1173413545,"m12cum":970044293,"m12pct":55,"m12total":1485616798,"ly3cum":510975596,"ly3pct":104,"ly3total":940773743},"transaction":{"cumulative":710514264,"target":2080000000,"progress":34,"m2cum":622653184,"m2pct":114,"m2total":1348073929,"m1cum":679587918,"m1pct":105,"m1total":1564551393,"m12cum":1293392391,"m12pct":55,"m12total":1980822397,"ly3cum":681300794,"ly3pct":104,"ly3total":1254364991}},"s2":{"dates_cw":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"dates_pw":["3.2(월)","3.3(화)","3.4(수)","3.5(목)","3.6(금)","3.7(토)","3.8(일)"],"rows":[{"label":"금주","type":"total","data":[120510481,82530778,83480804,83775784,0,0,0,370297847]},{"label":"시티브리즈","type":"brand","parent":"cw","data":[92295041,59090315,56625862,53320672,0,0,0,261331890]},{"label":"아티드","type":"brand","parent":"cw","data":[28215440,23440463,26854942,30455112,0,0,0,108965957]},{"label":"전주","type":"total","data":[64588009,40544416,43047814,43203447,34295265,37844177,138611123,402134251]},{"label":"시티브리즈","type":"brand","parent":"pw","data":[64588009,40544416,43047814,43203447,34295265,37844177,138611123,402134251]},{"label":"아티드","type":"brand","parent":"pw","data":[0,0,0,0,0,0,0,0]},{"label":"전주비","type":"pct","data":[77,69,59,119,70,89,105,81]},{"label":"시티브리즈","type":"pct-brand","data":[77,69,59,119,70,89,105,81]},{"label":"아티드","type":"pct-brand","data":[0,0,0,0,0,0,0,0]}]},"s4":{"dates":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"channels":[{"depth":0,"label":"시티브리즈","data":[92295041,59090315,56625862,53320672,0,0,0,261331890,402134251,65]},{"depth":1,"label":"자사몰","data":[5672675,5483390,6795275,10435300,0,0,0,28386640,58541145,48]},{"depth":1,"label":"W컨셉","data":[63729575,32505915,24531290,20882580,0,0,0,141649360,160886400,88]},{"depth":1,"label":"29cm","data":[9176050,9071730,13956270,10044720,0,0,0,42248770,94015040,45]},{"depth":1,"label":"지그재그","data":[2741970,2013670,3089950,2130910,0,0,0,9976500,18195350,55]},{"depth":1,"label":"무신사","data":[7110940,5985730,5303110,7254530,0,0,0,25654310,34254950,75]},{"depth":1,"label":"롯데온","data":[1947021,1328790,494127,411752,0,0,0,4181690,1379596,303]},{"depth":1,"label":"하고","data":[295500,577000,734260,529155,0,0,0,2135915,7345220,29]},{"depth":1,"label":"네이버","data":[249670,664450,645275,402715,0,0,0,1962110,1400630,140]},{"depth":1,"label":"EQL","data":[0,258700,245300,184230,0,0,0,688230,2248440,31]},{"depth":1,"label":"카카오선물하기","data":[0,0,0,0,0,0,0,0,0,0]},{"depth":1,"label":"브론테","data":[0,0,0,0,0,0,0,0,0,0]},{"depth":1,"label":"기타","data":[1371640,1200940,831005,1044780,0,0,0,4448365,23867480,19]}]}},"at_on":{"s1":{"revenue":{"cumulative":532885698,"target":1560000000,"progress":34,"m2cum":466989888,"m2pct":114,"m2total":1011055447,"m1cum":509690939,"m1pct":105,"m1total":1173413545,"m12cum":970044293,"m12pct":55,"m12total":1485616798,"ly3cum":510975596,"ly3pct":104,"ly3total":940773743},"transaction":{"cumulative":710514264,"target":2080000000,"progress":34,"m2cum":622653184,"m2pct":114,"m2total":1348073929,"m1cum":679587918,"m1pct":105,"m1total":1564551393,"m12cum":1293392391,"m12pct":55,"m12total":1980822397,"ly3cum":681300794,"ly3pct":104,"ly3total":1254364991}},"s2":{"dates_cw":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"dates_pw":["3.2(월)","3.3(화)","3.4(수)","3.5(목)","3.6(금)","3.7(토)","3.8(일)"],"rows":[{"label":"금주","type":"total","data":[120510481,82530778,83480804,83775784,0,0,0,370297847]},{"label":"시티브리즈","type":"brand","parent":"cw","data":[92295041,59090315,56625862,53320672,0,0,0,261331890]},{"label":"아티드","type":"brand","parent":"cw","data":[28215440,23440463,26854942,30455112,0,0,0,108965957]},{"label":"전주","type":"total","data":[64588009,40544416,43047814,43203447,34295265,37844177,138611123,402134251]},{"label":"시티브리즈","type":"brand","parent":"pw","data":[64588009,40544416,43047814,43203447,34295265,37844177,138611123,402134251]},{"label":"아티드","type":"brand","parent":"pw","data":[0,0,0,0,0,0,0,0]},{"label":"전주비","type":"pct","data":[77,69,59,119,70,89,105,81]},{"label":"시티브리즈","type":"pct-brand","data":[77,69,59,119,70,89,105,81]},{"label":"아티드","type":"pct-brand","data":[0,0,0,0,0,0,0,0]}]},"s4":{"dates":["3.9(월)","3.10(화)","3.11(수)","3.12(목)","3.13(금)","3.14(토)","3.15(일)"],"channels":[{"depth":0,"label":"아티드","data":[28215440,23440463,26854942,30455112,0,0,0,108965957,239753533,45]},{"depth":1,"label":"자사몰","data":[5384960,4302000,4783620,4735160,0,0,0,19205740,41190820,47]},{"depth":1,"label":"W컨셉","data":[15299900,5702115,5862340,8301960,0,0,0,35166315,108403440,32]},{"depth":1,"label":"29cm","data":[3464300,8653100,10042700,10675000,0,0,0,32835100,37329400,88]},{"depth":1,"label":"지그재그","data":[2208280,2078020,4222250,5243400,0,0,0,13751950,17017970,81]},{"depth":1,"label":"무신사","data":[709100,1410200,321100,1033800,0,0,0,3474200,4980900,70]},{"depth":1,"label":"롯데온","data":[123500,189828,92222,96792,0,0,0,502342,3232268,16]},{"depth":1,"label":"하고","data":[399700,796800,638600,239100,0,0,0,2074200,2129800,97]},{"depth":1,"label":"네이버","data":[165250,113100,293910,0,0,0,0,572260,278400,206]},{"depth":1,"label":"EQL","data":[221500,195300,449800,129900,0,0,0,996500,934800,107]},{"depth":1,"label":"카카오선물하기","data":[0,0,0,0,0,0,0,0,0,0]},{"depth":1,"label":"브론테","data":[0,0,0,0,0,0,0,0,21952400,0]},{"depth":1,"label":"기타","data":[238950,0,148400,0,0,0,0,387350,2303335,17]}]}}}; // %%INJECT_DATA%%
+const WEEKLY = {"weeks":["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12","W13","W14","W15","W16","W17","W18","W19","W20","W21","W22","W23","W24","W25","W26","W27","W28","W29","W30","W31","W32","W33","W34","W35","W36","W37","W38","W39","W40","W41","W42","W43","W44","W45","W46","W47","W48","W49","W50","W51","W52"],"tue":{"d2024":[180,195,210,205,220,215,230,245,260,280,310,340,380,360,330,300,290,285,270,255,240,235,250,270,290,310,340,370,360,340,320,300,280,260,240,220,210,230,260,300,350,400,420,450,480,520,580,620,640,580,520,480],"d2025":[200,220,240,235,250,245,260,280,300,320,350,380,420,400,370,340,330,320,310,290,275,265,280,305,330,350,380,410,400,380,360,340,320,300,280,250,240,260,290,340,390,450,470,510,540,580,650,700,720,650,580,540],"d2026":[250,280,310,300,320,310,330,350,380,400,370,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"fri":{"d2024":[190,200,218,212,228,222,238,255,272,295,325,355,395,375,345,315,305,298,282,268,252,248,262,282,305,325,355,385,375,355,335,315,295,275,252,232,222,242,275,315,365,418,438,468,498,540,600,640,660,600,540,498],"d2025":[215,235,255,250,268,262,278,298,320,342,375,405,445,425,395,365,355,342,332,312,298,282,298,325,355,375,405,435,425,405,385,365,342,322,298,268,258,278,312,365,418,478,498,538,568,608,678,728,750,678,608,568],"d2026":[268,298,332,322,342,332,355,378,408,430,398,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}}; // %%INJECT_WEEKLY%%
+const FIXED_DATE_STR = '2026. 3. 15 (일)'; // %%INJECT_DATE%%
+const TARGET_MONTH = 3; // %%INJECT_MONTH%%
+
+let chartDay = 'tue';
+
+// ============================================================
+// UTILITY
+// ============================================================
+const fmt = n => {
+  if (n === null || n === undefined) return '-';
+  return Number(n).toLocaleString('ko-KR');
+};
+const pctClass = v => {
+  const n = parseFloat(v);
+  if (isNaN(n)) return '';
+  return n >= 100 ? 'pct-up' : 'pct-down';
+};
+const pctCell = v => `<td class="center ${pctClass(v)}">${v}%</td>`;
+
+// ============================================================
+// TAB STRUCTURE
+// ============================================================
+const TAB_CONFIG = {
+  '전체':    ['전체','오프라인','온라인'],
+  '오프라인': ['오프라인','시티브리즈 오프라인','아티드 오프라인'],
+  '온라인':  ['온라인','시티브리즈 온라인','아티드 온라인']
+};
+
+let currentMain = '전체';
+let currentSub = '전체';
+
+// ============================================================
+// DATA ROUTING (GAS에서 7개 뷰 모두 주입됨)
+// ============================================================
+function getDataForView(main, sub) {
+  let key = 'total';
+  if (main === '전체') {
+    if (sub === '오프라인') key = 'offline';
+    else if (sub === '온라인') key = 'online';
+  } else if (main === '오프라인') {
+    if (sub === '시티브리즈 오프라인') key = 'cb_off';
+    else if (sub === '아티드 오프라인') key = 'at_off';
+    else key = 'offline';
+  } else if (main === '온라인') {
+    if (sub === '시티브리즈 온라인') key = 'cb_on';
+    else if (sub === '아티드 온라인') key = 'at_on';
+    else key = 'online';
+  }
+  const d = DATA[key] || DATA.total || {};
+  return { key: key, s1: d.s1 || null, s2: d.s2 || null, s4: d.s4 || null };
+}
+
+// ============================================================
+// RENDER TABS
+// ============================================================
+function renderTabs() {
+  const mainEl = document.getElementById('mainTabs');
+  const subEl = document.getElementById('subTabs');
+
+  mainEl.innerHTML = Object.keys(TAB_CONFIG).map(k =>
+    `<button class="tab-btn ${k===currentMain?'active':''}" onclick="selectMain('${k}')">${k}</button>`
+  ).join('');
+
+  const subs = TAB_CONFIG[currentMain];
+  subEl.innerHTML = subs.map(s =>
+    `<button class="tab-btn ${s===currentSub?'active':''}" onclick="selectSub('${s}')">${s}</button>`
+  ).join('');
+}
+
+function selectMain(m) {
+  currentMain = m;
+  currentSub = TAB_CONFIG[m][0];
+  renderTabs();
+  renderDashboard();
+}
+function selectSub(s) {
+  currentSub = s;
+  renderTabs();
+  renderDashboard();
+}
+
+// ============================================================
+// RENDER SECTION 1 – 당월 현황
+// ============================================================
+function renderSection1(s1) {
+  if (!s1) return '';
+  const M = TARGET_MONTH;
+
+  function makeCompareCard(label, cum, pct, total) {
+    return `<div class="mc-card">
+      <div class="mc-title">${label}</div>
+      <div class="mc-row"><span class="mc-label">누계</span><span class="mc-val">${fmt(cum)}</span></div>
+      <div class="mc-row"><span class="mc-label">동기비</span><span class="mc-val ${pctClass(pct)}">${pct}%</span></div>
+      <div class="mc-row"><span class="mc-label">총계</span><span class="mc-val">${fmt(total)}</span></div>
+    </div>`;
+  }
+
+  function makeTable(title, d, unit) {
+    // ---- Desktop version (table) ----
+    const desktop = `
+    <div class="s1-desktop">
+      <table class="summary">
+        <tr>
+          <th style="width:18%;background:#0F1B3D;color:#fff;font-size:.95rem;">${M}월 누계<br><span style="font-size:.72rem;font-weight:400">(${M}/1~${FIXED_DATE_STR})</span></th>
+          <td class="big-num" style="width:22%">${fmt(d.cumulative)}</td>
+          <th style="width:14%;background:#1B2E5C;color:#fff;">${M}월 ${unit} 목표</th>
+          <td style="width:18%;font-weight:600;">${fmt(d.target)}</td>
+          <th style="width:10%;background:#4A90D9;color:#fff;">진도율</th>
+          <td style="width:18%;font-weight:700;font-size:1.2rem;" class="${d.progress >= 100 ? 'pct-up' : 'pct-down'}">${d.progress}%</td>
+        </tr>
+      </table>
+      <table class="summary" style="margin-top:-1px;">
+        <tr>
+          <td class="sub-cell" style="width:25%;border-right:2px solid #D8DCE3;">
+            <div class="row-item"><span class="label">${M-1}월 누계</span><span class="value">${fmt(d.m1cum)}</span></div>
+            <div class="row-item pct"><span class="label">${M-1}월 동기비</span><span class="value ${pctClass(d.m1pct)}">${d.m1pct}%</span></div>
+            <div class="row-item"><span class="label">${M-1}월 총계</span><span class="value">${fmt(d.m1total)}</span></div>
+          </td>
+          <td class="sub-cell" style="width:25%;border-right:2px solid #D8DCE3;">
+            <div class="row-item"><span class="label">${M-2}월 누계</span><span class="value">${fmt(d.m2cum)}</span></div>
+            <div class="row-item pct"><span class="label">${M-2}월 동기비</span><span class="value ${pctClass(d.m2pct)}">${d.m2pct}%</span></div>
+            <div class="row-item"><span class="label">${M-2}월 총계</span><span class="value">${fmt(d.m2total)}</span></div>
+          </td>
+          <td class="sub-cell" style="width:25%;border-right:2px solid #D8DCE3;">
+            <div class="row-item"><span class="label">12월 누계</span><span class="value">${fmt(d.m12cum)}</span></div>
+            <div class="row-item pct"><span class="label">12월 동기비</span><span class="value ${pctClass(d.m12pct)}">${d.m12pct}%</span></div>
+            <div class="row-item"><span class="label">12월 총계</span><span class="value">${fmt(d.m12total)}</span></div>
+          </td>
+          <td class="sub-cell" style="width:25%;">
+            <div class="row-item"><span class="label">25' ${M}월 누계</span><span class="value">${fmt(d.ly3cum)}</span></div>
+            <div class="row-item pct"><span class="label">25' ${M}월 동기비</span><span class="value ${pctClass(d.ly3pct)}">${d.ly3pct}%</span></div>
+            <div class="row-item"><span class="label">25' ${M}월 총계</span><span class="value">${fmt(d.ly3total)}</span></div>
+          </td>
+        </tr>
+      </table>
+    </div>`;
+
+    // ---- Mobile version (div cards) ----
+    const mobile = `
+    <div class="s1-mobile">
+      <div class="mk-hero">
+        <div class="mk-hero-label">${M}월 누계 <span>(${M}/1~${FIXED_DATE_STR})</span></div>
+        <div class="mk-hero-value">${fmt(d.cumulative)}</div>
+      </div>
+      <div class="mk-sub-row">
+        <div class="mk-sub-item">
+          <div class="mk-sub-label">${M}월 ${unit} 목표</div>
+          <div class="mk-sub-value">${fmt(d.target)}</div>
+        </div>
+        <div class="mk-sub-item mk-progress">
+          <div class="mk-sub-label">진도율</div>
+          <div class="mk-sub-value ${d.progress >= 100 ? 'pct-up' : 'pct-down'}">${d.progress}%</div>
+        </div>
+      </div>
+      <div class="mc-grid">
+        ${makeCompareCard(`${M-1}월`, d.m1cum, d.m1pct, d.m1total)}
+        ${makeCompareCard(`${M-2}월`, d.m2cum, d.m2pct, d.m2total)}
+        ${makeCompareCard('12월', d.m12cum, d.m12pct, d.m12total)}
+        ${makeCompareCard(`25' ${M}월`, d.ly3cum, d.ly3pct, d.ly3total)}
+      </div>
+    </div>`;
+
+    return `
+    <div class="summary-wrap">
+      <div class="summary-label">${title} <span style="color:#888;font-weight:400;font-size:.78rem">(단위: 원)</span></div>
+      ${desktop}
+      ${mobile}
+    </div>`;
+  }
+
+  return `
+  <div class="section">
+    <div class="section-header">1. 당월(${M}월) 현황 <span class="badge">SUMMARY</span></div>
+    <div class="section-body">
+      ${makeTable(`1-1. ${M}월 매출액 현황 (회계기준)`, s1.revenue, '매출')}
+      ${makeTable(`1-2. ${M}월 거래액 현황`, s1.transaction, '거래액')}
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// RENDER SECTION 2 – 일별 거래액
+// ============================================================
+function renderSection2(s2) {
+  if (!s2) return '';
+
+  const rows = s2.rows;
+  const d_cw = s2.dates_cw;
+  const isSingle = s2._singleBrand === true;
+
+  let html = `<table class="data-tbl">`;
+
+  if (isSingle) {
+    html += `<thead><tr><th class="scol scol-1">주차</th>`;
+    d_cw.forEach(d => html += `<th>${d}</th>`);
+    html += `<th style="background:#E8EBF0;">TOTAL</th></tr></thead><tbody>`;
+    html += `<tr class="row-total"><td class="center scol scol-1">금주</td>`;
+    rows[0].data.forEach(v => html += `<td>${fmt(v)}</td>`);
+    html += `</tr>`;
+    html += `<tr class="row-total"><td class="center scol scol-1">전주</td>`;
+    rows[1].data.forEach(v => html += `<td>${fmt(v)}</td>`);
+    html += `</tr>`;
+    html += `<tr class="row-total" style="border-top:2px solid #1B2E5C;"><td class="center scol scol-1">전주비</td>`;
+    rows[2].data.forEach(v => html += pctCell(v));
+    html += `</tr>`;
+  } else {
+    html += `<thead><tr>
+      <th rowspan="2" class="scol scol-1" style="width:60px;">주차</th>
+      <th rowspan="2" class="scol scol-2" style="width:90px;">브랜드</th>`;
+    d_cw.forEach(d => html += `<th>${d}</th>`);
+    html += `<th style="background:#E8EBF0;">TOTAL</th></tr></thead><tbody>`;
+    // 금주
+    html += `<tr class="row-total"><td rowspan="3" class="center scol scol-1">금주</td><td class="left scol scol-2" style="font-weight:600;">합계</td>`;
+    rows[0].data.forEach(v => html += `<td>${fmt(v)}</td>`);
+    html += `</tr>`;
+    html += `<tr class="row-sub"><td class="left scol scol-2" style="padding-left:12px;">시티브리즈</td>`;
+    rows[1].data.forEach(v => html += `<td>${fmt(v)}</td>`);
+    html += `</tr>`;
+    html += `<tr class="row-sub"><td class="left scol scol-2" style="padding-left:12px;">아티드</td>`;
+    rows[2].data.forEach(v => html += `<td>${fmt(v)}</td>`);
+    html += `</tr>`;
+    // 전주
+    html += `<tr class="row-total"><td rowspan="3" class="center scol scol-1">전주</td><td class="left scol scol-2" style="font-weight:600;">합계</td>`;
+    rows[3].data.forEach(v => html += `<td>${fmt(v)}</td>`);
+    html += `</tr>`;
+    html += `<tr class="row-sub"><td class="left scol scol-2" style="padding-left:12px;">시티브리즈</td>`;
+    rows[4].data.forEach(v => html += `<td>${fmt(v)}</td>`);
+    html += `</tr>`;
+    html += `<tr class="row-sub"><td class="left scol scol-2" style="padding-left:12px;">아티드</td>`;
+    rows[5].data.forEach(v => html += `<td>${fmt(v)}</td>`);
+    html += `</tr>`;
+    // 전주비
+    html += `<tr class="row-total" style="border-top:2px solid #1B2E5C;"><td rowspan="3" class="center scol scol-1">전주비</td><td class="left scol scol-2" style="font-weight:600;">합계</td>`;
+    rows[6].data.forEach(v => html += pctCell(v));
+    html += `</tr>`;
+    html += `<tr class="row-sub"><td class="left scol scol-2" style="padding-left:12px;">시티브리즈</td>`;
+    rows[7].data.forEach(v => html += pctCell(v));
+    html += `</tr>`;
+    html += `<tr class="row-sub"><td class="left scol scol-2" style="padding-left:12px;">아티드</td>`;
+    rows[8].data.forEach(v => html += pctCell(v));
+    html += `</tr>`;
+  }
+
+  html += `</tbody></table>`;
+
+  return `
+  <div class="section">
+    <div class="section-header">2. 일별 거래액 현황 (최근 7일) <span class="badge">DAILY</span></div>
+    <div class="section-body">${html}</div>
+  </div>`;
+}
+
+// ============================================================
+// RENDER SECTION 3 – 주차별 거래액 추이 CHART
+// ============================================================
+let chartInstance = null;
+
+function renderSection3() {
+  return `
+  <div class="section">
+    <div class="section-header" style="justify-content:space-between;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        3. '24~'26 주차별 거래액 추이 <span class="badge">WEEKLY TREND</span>
+      </div>
+      <div style="display:flex;gap:4px;">
+        <button class="chart-day-btn ${chartDay==='tue'?'active':''}" onclick="switchChartDay('tue')">화요일 기준</button>
+        <button class="chart-day-btn ${chartDay==='fri'?'active':''}" onclick="switchChartDay('fri')">금요일 기준</button>
+      </div>
+    </div>
+    <div class="section-body s3-body">
+      <div class="s3-y-axis" id="s3YAxis"></div>
+      <div class="s3-scroll" id="s3Scroll">
+        <div class="chart-container"><canvas id="weeklyChart"></canvas></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function switchChartDay(day) {
+  chartDay = day;
+  document.querySelectorAll('.chart-day-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.includes(day === 'tue' ? '화요일' : '금요일'));
+  });
+  initChart();
+}
+
+function initChart() {
+  const ctx = document.getElementById('weeklyChart');
+  if (!ctx) return;
+  if (chartInstance) { chartInstance.destroy(); }
+
+  // Per-view weekly data lookup
+  const viewInfo = getDataForView(currentMain, currentSub);
+  const w = WEEKLY[viewInfo.key] || WEEKLY.total;
+  if (!w || !w.weeks || w.weeks.length === 0) return; // 데이터 미연동 시 차트 스킵
+  const src = chartDay === 'fri' ? w.fri : w.tue;
+
+  // 기준일 주차 인덱스 (시트 E/F열 기준: 화요주차, 금요주차)
+  const curWeekIdx = chartDay === 'fri' ? CUR_WEEK_FRI : CUR_WEEK_TUE;
+  const colors2026 = src.d2026.map((v, i) => {
+    if (v === null || v === 0) return 'rgba(26,75,150,0.85)';
+    return i === curWeekIdx ? '#E53935' : 'rgba(26,75,150,0.85)';
+  });
+  const border2026 = src.d2026.map((v, i) => {
+    if (v === null || v === 0) return 'rgba(26,75,150,1)';
+    return i === curWeekIdx ? '#B71C1C' : 'rgba(26,75,150,1)';
+  });
+
+  const isMobile = window.innerWidth <= 768;
+
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: w.weeks,
+      datasets: [
+        {
+          label: '2024',
+          data: src.d2024,
+          backgroundColor: 'rgba(200,210,220,0.6)',
+          borderColor: 'rgba(160,170,180,0.8)',
+          borderWidth: 1
+        },
+        {
+          label: '2025',
+          data: src.d2025,
+          backgroundColor: 'rgba(100,160,220,0.55)',
+          borderColor: 'rgba(80,140,200,0.8)',
+          borderWidth: 1
+        },
+        {
+          label: '2026',
+          data: src.d2026,
+          backgroundColor: colors2026,
+          borderColor: border2026,
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            font: { family: 'Noto Sans KR', size: isMobile ? 13 : 12 },
+            usePointStyle: true,
+            generateLabels: function(chart) {
+              const ds = chart.data.datasets;
+              return ds.map((d, i) => ({
+                text: d.label,
+                fillStyle: i === 0 ? 'rgba(200,210,220,0.6)' : i === 1 ? 'rgba(100,160,220,0.55)' : 'rgba(26,75,150,0.85)',
+                strokeStyle: i === 0 ? 'rgba(160,170,180,0.8)' : i === 1 ? 'rgba(80,140,200,0.8)' : 'rgba(26,75,150,1)',
+                lineWidth: 1,
+                datasetIndex: i,
+                hidden: !chart.isDatasetVisible(i)
+              }));
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y ? ctx.parsed.y.toLocaleString() : '-'}백만`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            font: function(context) {
+              return context.index === curWeekIdx
+                ? { family: 'Noto Sans KR', size: isMobile ? 13 : 11, weight: 'bold' }
+                : { family: 'Noto Sans KR', size: isMobile ? 12 : 10 };
+            },
+            maxRotation: 90, minRotation: 45,
+            color: function(context) {
+              return context.index === curWeekIdx ? '#E53935' : '#666';
+            }
+          }
+        },
+        y: {
+          beginAtZero: true,
+          display: !isMobile, /* hide Y-axis on mobile (rendered externally) */
+          ticks: {
+            font: { family: 'Noto Sans KR', size: 11 },
+            callback: v => v.toLocaleString()
+          },
+          title: { display: true, text: '백만원', font: { family: 'Noto Sans KR', size: 12 } }
+        }
+      }
+    }
+  });
+
+  /* Populate external Y-axis div on mobile */
+  if (isMobile) {
+    setTimeout(() => populateS3YAxis(), 150);
+  }
+}
+
+function populateS3YAxis() {
+  const yDiv = document.getElementById('s3YAxis');
+  if (!yDiv || !chartInstance) return;
+  const yScale = chartInstance.scales.y;
+  if (!yScale) return;
+  const ticks = yScale.ticks;
+
+  // Get chart area boundaries to align Y-axis perfectly
+  const chartArea = chartInstance.chartArea;
+  const canvasH = chartInstance.canvas.offsetHeight;
+  const topPad = chartArea.top;  // space above chart area (legend, etc.)
+  const bottomPad = canvasH - chartArea.bottom; // space below chart area (x-axis labels)
+
+  yDiv.style.paddingTop = topPad + 'px';
+  yDiv.style.paddingBottom = bottomPad + 'px';
+
+  // Build from top (max) to bottom (min)
+  let html = '';
+  for (let i = ticks.length - 1; i >= 0; i--) {
+    html += `<div class="y-tick">${Number(ticks[i].value).toLocaleString()}</div>`;
+  }
+  yDiv.innerHTML = html;
+}
+
+// ============================================================
+// RENDER SECTION 4 – 채널별 거래액 (필터 + 정렬)
+// ============================================================
+let s4State = {
+  sortKey: 'none',
+  selected: new Set(),
+  allChannels: [],
+  pickerOpen: false,
+  searchText: ''
+};
+
+function resetS4State(channels) {
+  s4State.allChannels = channels || [];
+  s4State.sortKey = 'sum-desc';
+  s4State.selected = new Set(channels.map((_,i) => i));
+  s4State.pickerOpen = false;
+  s4State.searchText = '';
+}
+
+function getFilteredChannels() {
+  const ch = s4State.allChannels;
+  let filtered = ch.filter((_, i) => s4State.selected.has(i));
+  if (s4State.searchText.trim()) {
+    const q = s4State.searchText.trim().toLowerCase();
+    filtered = filtered.filter(r => r.label.toLowerCase().includes(q));
+  }
+  if (s4State.sortKey !== 'none') {
+    const colMap = {
+      'sum-desc': {col:7, dir:-1}, 'sum-asc': {col:7, dir:1},
+      'prev-desc': {col:8, dir:-1}, 'prev-asc': {col:8, dir:1},
+      'pct-desc': {col:9, dir:-1}, 'pct-asc': {col:9, dir:1}
+    };
+    const {col, dir} = colMap[s4State.sortKey];
+
+    // Top-down hierarchical sort:
+    // 1. Build tree: group items by parent
+    // 2. Sort siblings at each level by sort key
+    // 3. Flatten back preserving parent→children order
+    const allCh = s4State.allChannels;
+
+    // Tag each item with its original index
+    const tagged = filtered.map(r => ({row: r, origIdx: allCh.indexOf(r)}));
+
+    // Build groups: depth 0 are roots, children follow their parent
+    function buildTree(items) {
+      const roots = [];
+      let currentD0 = null, currentD1 = null, currentD2 = null;
+
+      items.forEach(item => {
+        const d = item.row.depth;
+        if (d === 0) {
+          currentD0 = {item, children: []};
+          roots.push(currentD0);
+          currentD1 = null; currentD2 = null;
+        } else if (d === 1 && currentD0) {
+          currentD1 = {item, children: []};
+          currentD0.children.push(currentD1);
+          currentD2 = null;
+        } else if (d === 2 && currentD1) {
+          currentD2 = {item, children: []};
+          currentD1.children.push(currentD2);
+        } else if (d === 3 && currentD2) {
+          currentD2.children.push({item, children: []});
+        } else if (d === 1) {
+          currentD1 = {item, children: []};
+          roots.push(currentD1);
+          currentD2 = null;
+        }
+      });
+      return roots;
+    }
+
+    const sortVal = node => (node.item.row.data[col] || 0);
+    function sortTree(nodes) {
+      nodes.sort((a,b) => (sortVal(a) - sortVal(b)) * dir);
+      nodes.forEach(n => sortTree(n.children));
+    }
+
+    function flatten(nodes) {
+      const out = [];
+      nodes.forEach(n => {
+        out.push(n.item.row);
+        flatten(n.children).forEach(c => out.push(c));
+      });
+      return out;
+    }
+
+    const tree = buildTree(tagged);
+    sortTree(tree);
+    filtered = flatten(tree);
+  }
+  return filtered;
+}
+
+function renderSection4(s4) {
+  if (!s4 || !s4.channels || s4.channels.length === 0) return '';
+  if (s4State.allChannels !== s4.channels) {
+    resetS4State(s4.channels);
+  }
+  return `
+  <div class="section">
+    <div class="section-header">4. 채널별 거래액 현황 (최근 7일) <span class="badge">CHANNEL</span></div>
+    <div class="section-body">
+      <div id="s4FilterToolbar"></div>
+      <div id="s4TableWrap" style="overflow-x:auto;"></div>
+    </div>
+  </div>`;
+}
+
+function renderS4Toolbar() {
+  const el = document.getElementById('s4FilterToolbar');
+  if (!el) return;
+  const total = s4State.allChannels.length;
+  const selCount = s4State.selected.size;
+
+  el.innerHTML = `
+  <div class="filter-toolbar">
+    <div class="filter-group">
+      <label>정렬 기준</label>
+      <select id="s4Sort" onchange="onS4SortChange(this.value)">
+        <option value="none" ${s4State.sortKey==='none'?'selected':''}>기본 (원본 순서)</option>
+        <option value="sum-desc" ${s4State.sortKey==='sum-desc'?'selected':''}>합계 내림차순</option>
+        <option value="sum-asc" ${s4State.sortKey==='sum-asc'?'selected':''}>합계 오름차순</option>
+        <option value="prev-desc" ${s4State.sortKey==='prev-desc'?'selected':''}>전주 합계 내림차순</option>
+        <option value="prev-asc" ${s4State.sortKey==='prev-asc'?'selected':''}>전주 합계 오름차순</option>
+        <option value="pct-desc" ${s4State.sortKey==='pct-desc'?'selected':''}>전주비 내림차순</option>
+        <option value="pct-asc" ${s4State.sortKey==='pct-asc'?'selected':''}>전주비 오름차순</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>채널 선택</label>
+      <div class="channel-picker" id="channelPicker">
+        <button class="channel-picker-btn ${s4State.pickerOpen?'open':''}" onclick="togglePicker(event)">
+          <span>${selCount === total ? '전체 선택됨' : selCount+'개 선택됨'}</span>
+          <span class="arrow">${s4State.pickerOpen?'▲':'▼'}</span>
+        </button>
+        <div class="channel-picker-panel ${s4State.pickerOpen?'show':''}" id="cpPanel" onclick="event.stopPropagation()">
+          <div class="cp-actions">
+            <button onclick="cpSelectAll()">전체 선택</button>
+            <button onclick="cpDeselectAll()">전체 해제</button>
+            <button onclick="cpBrandOnly('시티브리즈')">시티브리즈만</button>
+            <button onclick="cpBrandOnly('아티드')">아티드만</button>
+          </div>
+          <div id="cpList" style="padding:4px 0;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label>검색</label>
+      <input type="text" id="s4Search" placeholder="채널/점포명 검색..."
+             value="${s4State.searchText}"
+             oninput="onS4Search(this.value)">
+    </div>
+    <button class="btn-reset-filter" onclick="onS4Reset()">필터 초기화</button>
+    <span class="filter-count">${getFilteredChannels().length}개 항목 표시 중</span>
+  </div>`;
+  renderPickerList();
+}
+
+function renderPickerList() {
+  const list = document.getElementById('cpList');
+  if (!list) return;
+  list.innerHTML = s4State.allChannels.map((ch, i) => `
+    <label class="cp-item depth-${ch.depth}">
+      <input type="checkbox" ${s4State.selected.has(i)?'checked':''}
+             onchange="onCpToggle(${i}, this.checked)">
+      <span>${ch.label}</span>
+    </label>
+  `).join('');
+}
+
+function renderS4Table() {
+  const el = document.getElementById('s4TableWrap');
+  if (!el) return;
+  const view = getDataForView(currentMain, currentSub);
+  const dates = view.s4.dates;
+  const filtered = getFilteredChannels();
+
+  let html = `<table class="data-tbl"><thead><tr>
+    <th class="scol scol-1" style="min-width:180px;">구분 / 채널</th>`;
+  dates.forEach(d => html += `<th>${d}</th>`);
+  html += `<th style="background:#E8EBF0;cursor:pointer;" onclick="onS4SortToggle('sum')">합계 ⇅</th>`;
+  html += `<th style="background:#E8EBF0;cursor:pointer;" onclick="onS4SortToggle('prev')">전주 합계 ⇅</th>`;
+  html += `<th style="background:#E8EBF0;cursor:pointer;" onclick="onS4SortToggle('pct')">전주비 ⇅</th>`;
+  html += `</tr></thead><tbody>`;
+
+  if (filtered.length === 0) {
+    html += `<tr><td colspan="${dates.length + 4}" class="center" style="padding:24px;color:#888;">조건에 맞는 데이터가 없습니다.</td></tr>`;
+  }
+
+  const isSubtotal = (row) => {
+    const orig = s4State.allChannels;
+    const origIdx = orig.indexOf(row);
+    if (row.depth === 0) return 'subtotal-depth0';
+    if (row.depth === 1) {
+      // depth1이 하위(depth2)를 가진 경우에만 subtotal 처리
+      if (origIdx >= 0 && origIdx + 1 < orig.length && orig[origIdx + 1].depth === 2) {
+        return 'subtotal-depth1';
+      }
+      return '';
+    }
+    if (row.depth === 2) {
+      if (origIdx >= 0 && origIdx + 1 < orig.length && orig[origIdx + 1].depth === 3) {
+        return 'subtotal-depth2';
+      }
+    }
+    return '';
+  };
+
+  filtered.forEach(row => {
+    const depthClass = `row-depth${row.depth}`;
+    const subtotalClass = isSubtotal(row);
+    html += `<tr class="${depthClass} ${subtotalClass}">`;
+    html += `<td class="left scol scol-1">${row.label}</td>`;
+    for (let i = 0; i < 9; i++) {
+      html += `<td>${fmt(row.data[i])}</td>`;
+    }
+    const pv = row.data[9];
+    if (pv !== undefined && pv !== null && pv !== 0) {
+      html += `<td class="center ${pctClass(pv)}">${pv}%</td>`;
+    } else {
+      html += `<td class="center" style="color:#aaa;">-</td>`;
+    }
+    html += `</tr>`;
+  });
+
+  html += `</tbody></table>`;
+  el.innerHTML = html;
+}
+
+// ---- 이벤트 핸들러 ----
+let _pickerJustToggled = false;
+
+function togglePicker(evt) {
+  if (evt) evt.stopPropagation();
+  s4State.pickerOpen = !s4State.pickerOpen;
+  const panel = document.getElementById('cpPanel');
+  const btn = document.querySelector('.channel-picker-btn');
+  if (panel) panel.classList.toggle('show', s4State.pickerOpen);
+  if (btn) {
+    btn.classList.toggle('open', s4State.pickerOpen);
+    btn.querySelector('.arrow').textContent = s4State.pickerOpen ? '▲' : '▼';
+  }
+  if (s4State.pickerOpen) {
+    _pickerJustToggled = true;
+    setTimeout(() => { _pickerJustToggled = false; }, 50);
+  }
+}
+
+function updatePickerBtnText() {
+  const btn = document.querySelector('.channel-picker-btn span:first-child');
+  const cnt = document.querySelector('.filter-count');
+  const total = s4State.allChannels.length;
+  const selCount = s4State.selected.size;
+  if (btn) btn.textContent = selCount === total ? '전체 선택됨' : selCount + '개 선택됨';
+  if (cnt) cnt.textContent = getFilteredChannels().length + '개 항목 표시 중';
+}
+
+function onCpToggle(idx, checked) {
+  if (checked) s4State.selected.add(idx);
+  else s4State.selected.delete(idx);
+  updatePickerBtnText();
+  renderS4Table();
+}
+
+function cpSelectAll() {
+  s4State.selected = new Set(s4State.allChannels.map((_,i) => i));
+  renderPickerList();
+  updatePickerBtnText();
+  renderS4Table();
+}
+
+function cpDeselectAll() {
+  s4State.selected = new Set();
+  renderPickerList();
+  updatePickerBtnText();
+  renderS4Table();
+}
+
+function cpBrandOnly(brand) {
+  s4State.selected = new Set();
+  let insideBrand = false;
+  s4State.allChannels.forEach((ch, i) => {
+    if (ch.depth === 0) { s4State.selected.add(i); return; }
+    if (ch.depth === 1 && ch.label === brand) { insideBrand = true; s4State.selected.add(i); }
+    else if (ch.depth === 1 && ch.label !== brand) { insideBrand = false; }
+    else if (insideBrand) { s4State.selected.add(i); }
+  });
+  renderPickerList();
+  updatePickerBtnText();
+  renderS4Table();
+}
+
+function onS4SortChange(val) {
+  s4State.sortKey = val;
+  updatePickerBtnText();
+  renderS4Table();
+}
+
+function onS4SortToggle(type) {
+  const current = s4State.sortKey;
+  if (type === 'sum') {
+    s4State.sortKey = current === 'sum-desc' ? 'sum-asc' : 'sum-desc';
+  } else if (type === 'prev') {
+    s4State.sortKey = current === 'prev-desc' ? 'prev-asc' : 'prev-desc';
+  } else if (type === 'pct') {
+    s4State.sortKey = current === 'pct-desc' ? 'pct-asc' : 'pct-desc';
+  }
+  const sel = document.getElementById('s4Sort');
+  if (sel) sel.value = s4State.sortKey;
+  updatePickerBtnText();
+  renderS4Table();
+}
+
+function onS4Search(val) {
+  s4State.searchText = val;
+  renderS4Table();
+  updatePickerBtnText();
+}
+
+function onS4Reset() {
+  resetS4State(s4State.allChannels);
+  renderS4Toolbar();
+  renderS4Table();
+}
+
+// 패널 외부 클릭 시 닫기
+document.addEventListener('click', e => {
+  if (_pickerJustToggled) return;
+  if (!s4State.pickerOpen) return;
+  const picker = document.getElementById('channelPicker');
+  if (picker && !picker.contains(e.target)) {
+    s4State.pickerOpen = false;
+    const panel = document.getElementById('cpPanel');
+    const btn = document.querySelector('.channel-picker-btn');
+    if (panel) panel.classList.remove('show');
+    if (btn) {
+      btn.classList.remove('open');
+      const arrow = btn.querySelector('.arrow');
+      if (arrow) arrow.textContent = '▼';
+    }
+  }
+});
+
+// ============================================================
+// MAIN RENDER
+// ============================================================
+function renderDashboard() {
+  const view = getDataForView(currentMain, currentSub);
+  const el = document.getElementById('dashboardContent');
+  if (view.s4 && view.s4.channels) {
+    resetS4State(view.s4.channels);
+  }
+  el.innerHTML = renderSection1(view.s1) + renderSection2(view.s2) + renderSection3() + renderSection4(view.s4);
+  requestAnimationFrame(() => {
+    initChart();
+    renderS4Toolbar();
+    renderS4Table();
+  });
+}
+
+// ============================================================
+// DATE DISPLAY (GAS 주입 날짜 사용)
+// ============================================================
+function setDate() {
+  document.getElementById('headerDate').textContent = FIXED_DATE_STR + '  기준';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  setDate();
+  renderTabs();
+  renderDashboard();
+});
+</script>
+</body>
+</html>
