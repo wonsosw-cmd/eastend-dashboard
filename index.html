@@ -504,7 +504,7 @@ const pctCell = v => `<td class="center ${pctClass(v)}">${v}%</td>`;
 // TAB STRUCTURE
 // ============================================================
 const TAB_CONFIG = {
-  '전체':    ['전체','오프라인','온라인'],
+  '전체':    [],
   '오프라인': ['오프라인','시티브리즈 오프라인','아티드 오프라인'],
   '온라인':  ['온라인','시티브리즈 온라인','아티드 온라인']
 };
@@ -545,14 +545,19 @@ function renderTabs() {
   ).join('');
 
   const subs = TAB_CONFIG[currentMain];
-  subEl.innerHTML = subs.map(s =>
-    `<button class="tab-btn ${s===currentSub?'active':''}" onclick="selectSub('${s}')">${s}</button>`
-  ).join('');
+  if (subs.length === 0) {
+    subEl.style.display = 'none';
+  } else {
+    subEl.style.display = '';
+    subEl.innerHTML = subs.map(s =>
+      `<button class="tab-btn ${s===currentSub?'active':''}" onclick="selectSub('${s}')">${s}</button>`
+    ).join('');
+  }
 }
 
 function selectMain(m) {
   currentMain = m;
-  currentSub = TAB_CONFIG[m][0];
+  currentSub = TAB_CONFIG[m].length > 0 ? TAB_CONFIG[m][0] : m;
   renderTabs();
   renderDashboard();
 }
