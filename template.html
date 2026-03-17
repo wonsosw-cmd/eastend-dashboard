@@ -482,6 +482,145 @@ const WEEKLY = {"weeks":["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11
 const FIXED_DATE_STR = '2026. 3. 15 (일)'; // %%INJECT_DATE%%
 const TARGET_MONTH = 3; // %%INJECT_MONTH%%
 
+// ============================================================
+// DATA ADAPTER: GAS 출력 형식 → 템플릿 기대 형식 자동 변환
+// ============================================================
+(function adaptGASData() {
+  if (!DATA) return;
+  Object.keys(DATA).forEach(function(viewKey) {
+    var view = DATA[viewKey];
+    if (!view) return;
+
+    // --- S1 Adapter ---
+    if (view.s1 && !view.s1.revenue) {
+      var s1 = view.s1;
+      var mkMetric = function(cum) {
+        return {
+          cumulative: cum || 0,
+          target: 0, progress: 0,
+          m1cum: 0, m1pct: 0, m1total: 0,
+          m2cum: 0, m2pct: 0, m2total: 0,
+          m12cum: 0, m12pct: 0, m12total: 0,
+          ly3cum: 0, ly3pct: 0, ly3total: 0
+        };
+      };
+      view.s1 = {
+        revenue: mkMetric(s1.curRev || s1.curCum),
+        transaction: mkMetric(s1.curCum)
+      };
+    }
+
+    // --- S2 Adapter ---
+    if (view.s2 && view.s2.current && !view.s2.rows) {
+      var cur = view.s2.current || [];
+      var prev = view.s2.previous || [];
+      var dayNames = ['(일)','(월)','(화)','(수)','(목)','(금)','(토)'];
+      var fmtDate = function(dStr) {
+        var parts = dStr.split('/');
+        var m = parseInt(parts[0]), d = parseInt(parts[1]);
+        var dt = new Date(2026, m - 1, d);
+        return m + '.' + d + dayNames[dt.getDay()];
+      };
+      var dates_cw = cur.map(function(d) { return fmtDate(d.date); });
+      var dates_pw = prev.map(function(d) { return fmtDate(d.date); });
+      var cwVals = cur.map(function(d) { return d.value || 0; });
+      var pwVals = prev.map(function(d) { return d.value || 0; });
+      var cwTotal = cwVals.reduce(function(a,b) { return a+b; }, 0);
+      var pwTotal = pwVals.reduce(function(a,b) { return a+b; }, 0);
+      var pctVals = cwVals.map(function(v,i) { return pwVals[i] > 0 ? Math.round(v / pwVals[i] * 100) : 0; });
+      var totalPct = pwTotal > 0 ? Math.round(cwTotal / pwTotal * 100) : 0;
+
+      view.s2 = {
+        dates_cw: dates_cw,
+        dates_pw: dates_pw,
+        _singleBrand: true,
+        rows: [
+          { label: '금주', type: 'total', data: cwVals.concat([cwTotal]) },
+          { label: '전주', type: 'total', data: pwVals.concat([pwTotal]) },
+          { label: '전주비', type: 'pct', data: pctVals.concat([totalPct]) }
+        ]
+      };
+    }
+
+    // --- S4 Adapter ---
+    if (view.s4 && view.s4.current && !view.s4.channels) {
+      var stores = view.s4.current || [];
+      var prevStores = view.s4.previous || [];
+      var dayNames4 = ['(일)','(월)','(화)','(수)','(목)','(금)','(토)'];
+      var s4dates = [];
+      if (stores.length > 0 && stores[0].daily && stores[0].daily.length > 0) {
+        s4dates = stores[0].daily.map(function(d) {
+          var parts = d.date.split('/');
+          var m = parseInt(parts[0]), dd = parseInt(parts[1]);
+          var dt = new Date(2026, m - 1, dd);
+          return m + '.' + dd + dayNames4[dt.getDay()];
+        });
+      }
+
+      // Build prev lookup by code
+      var prevMap = {};
+      prevStores.forEach(function(ps) { prevMap[ps.code] = ps; });
+
+      // Group by brand then distribution
+      var brandGroups = {};
+      stores.forEach(function(st) {
+        var b = st.brand || 'unknown';
+        if (!brandGroups[b]) brandGroups[b] = {};
+        var dist = st.distribution || 'etc';
+        if (!brandGroups[b][dist]) brandGroups[b][dist] = [];
+        brandGroups[b][dist].push(st);
+      });
+
+      var channels = [];
+      var grandCw = new Array(s4dates.length).fill(0);
+      var grandPw = 0;
+
+      // Build hierarchy: brand(depth0) > distribution(depth1) > store(depth2)
+      Object.keys(brandGroups).forEach(function(brandName) {
+        var brandCw = new Array(s4dates.length).fill(0);
+        var brandPwTotal = 0;
+        var brandChildren = [];
+
+        Object.keys(brandGroups[brandName]).forEach(function(distName) {
+          var storeList = brandGroups[brandName][distName];
+          var distCw = new Array(s4dates.length).fill(0);
+          var distPwTotal = 0;
+          var distChildren = [];
+
+          storeList.forEach(function(st) {
+            var cwDays = st.daily ? st.daily.map(function(d) { return d.value || 0; }) : new Array(s4dates.length).fill(0);
+            var cwSum = cwDays.reduce(function(a,b) { return a+b; }, 0);
+            var ps = prevMap[st.code];
+            var pwSum = ps && ps.daily ? ps.daily.reduce(function(a,d) { return a + (d.value || 0); }, 0) : 0;
+            var pct = pwSum > 0 ? Math.round(cwSum / pwSum * 100) : 0;
+            cwDays.forEach(function(v,i) { distCw[i] += v; });
+            distPwTotal += pwSum;
+            distChildren.push({ depth: 2, label: st.store || st.channel || st.code, data: cwDays.concat([cwSum, pwSum, pct]) });
+          });
+
+          var distCwSum = distCw.reduce(function(a,b) { return a+b; }, 0);
+          var distPct = distPwTotal > 0 ? Math.round(distCwSum / distPwTotal * 100) : 0;
+          distCw.forEach(function(v,i) { brandCw[i] += v; });
+          brandPwTotal += distPwTotal;
+
+          brandChildren.push({ depth: 1, label: distName, data: distCw.concat([distCwSum, distPwTotal, distPct]) });
+          distChildren.forEach(function(c) { brandChildren.push(c); });
+        });
+
+        var brandCwSum = brandCw.reduce(function(a,b) { return a+b; }, 0);
+        var brandPct = brandPwTotal > 0 ? Math.round(brandCwSum / brandPwTotal * 100) : 0;
+        brandCw.forEach(function(v,i) { grandCw[i] += v; });
+        grandPw += brandPwTotal;
+
+        channels.push({ depth: 0, label: brandName, data: brandCw.concat([brandCwSum, brandPwTotal, brandPct]) });
+        brandChildren.forEach(function(c) { channels.push(c); });
+      });
+
+      view.s4 = { dates: s4dates, channels: channels };
+    }
+  });
+})();
+
 let chartDay = 'tue';
 
 // ============================================================
