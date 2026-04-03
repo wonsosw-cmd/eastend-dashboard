@@ -2703,7 +2703,7 @@ function generateAcctReport(){
   function acctDateSales(rows, d) { var total=0; rows.forEach(function(p){ total+=(p.sales[d]||0)*acctMultiplier(p.type); }); return Math.round(total); }
   function acctCumDailyTgt(rows, dates) { var total=0; rows.forEach(function(p){ var mult=acctMultiplier(p.type); dates.forEach(function(d){ total+=getDailyTgt([p],d)*mult; }); }); return Math.round(total); }
   generateReportShared({title:'회계 매출 보고',gradA:'#5B21B6',gradB:'#7C3AED',targetId:'acctReportContent',
-    subtitle:'오프라인 ×0.9 / 온라인 ×0.72 적용', salesLabel:'매출', salesFn:acctSales, dateSalesFn:acctDateSales, tgtFn:acctCumDailyTgt});
+    subtitle:'오프라인 ×0.9 / 온라인 ×0.72 / 기타 ×1.0 적용', salesLabel:'매출', salesFn:acctSales, dateSalesFn:acctDateSales, tgtFn:acctCumDailyTgt});
 }
 function getKSTD1(){
   var now = new Date();
