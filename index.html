@@ -352,13 +352,13 @@ div[style*="padding:30px"][style*="position:fixed"]{padding:10px !important;}
 .prod-action-btn.prod-action-trend:hover{background:#DBEAFE;}
 </style>
 <style id="lockStyle">body>*:not(#lockScreen){display:none!important}</style><link rel="apple-touch-icon" sizes="180x180" href="https://wonsosw-cmd.github.io/eastend-dashboard/icon-180.png"><link rel="manifest" href="https://wonsosw-cmd.github.io/eastend-dashboard/manifest.json"><meta name="apple-mobile-web-app-title" content="EASTEND"><meta name="apple-mobile-web-app-capable" content="yes"><script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
-<link rel="apple-touch-icon" sizes="180x180" href="https://wonsosw-cmd.github.io/eastend-dashboard/icon-180.png"><link rel="manifest" href="https://wonsosw-cmd.github.io/eastend-dashboard/manifest.json"><meta name="apple-mobile-web-app-title" content="EASTEND"><meta name="apple-mobile-web-app-capable" content="yes"><style id="lockStyle">body>*:not(#lockScreen){display:none!important}</style><link rel="apple-touch-icon" sizes="180x180" href="https://wonsosw-cmd.github.io/eastend-dashboard/icon-180.png"><link rel="manifest" href="https://wonsosw-cmd.github.io/eastend-dashboard/manifest.json"><meta name="apple-mobile-web-app-title" content="EASTEND"><meta name="apple-mobile-web-app-capable" content="yes"><style id="lockStyle">body>*:not(#lockScreen){display:none!important}</style></head><body style="overflow:hidden">
+<link rel="apple-touch-icon" sizes="180x180" href="https://wonsosw-cmd.github.io/eastend-dashboard/icon-180.png"><link rel="manifest" href="https://wonsosw-cmd.github.io/eastend-dashboard/manifest.json"><meta name="apple-mobile-web-app-title" content="EASTEND"><meta name="apple-mobile-web-app-capable" content="yes"><style id="lockStyle">body>*:not(#lockScreen){display:none!important}</style></head><body style="overflow:hidden">
 <div id="lockScreen" style="position: fixed; top: 0px; left: 0px; width: 100%; min-height: 100vh; min-height: 100dvh; height: 100%; background: rgb(15, 23, 42); overflow: hidden; z-index: 99999; display: flex; align-items: center; justify-content: center; font-family: &quot;Noto Sans KR&quot;, sans-serif;">
   <div style="text-align:center; padding:40px; max-width:360px; width:90%;"><div style=" width:64px; height:64px; margin:0 auto 20px; background:linear-gradient(135deg,#3B82F6,#8B5CF6);
       border-radius:16px; display:flex; align-items:center; justify-content:center; font-family:'DM Sans'; font-weight:700; font-size:18px; color:white; ">EE</div>
     <div style="font-size:18px; font-weight:700; color:white; margin-bottom:6px;">이스트엔드 거래액 대시보드</div><div style="font-size:13px; color:#64748B; margin-bottom:28px;">접근하려면 비밀번호를 입력하세요</div>
     <input id="lockPw" type="password" placeholder="비밀번호 입력" autocomplete="off" style="width: 100%; padding: 14px 16px; border-radius: 10px; border: 2px solid rgb(51, 65, 85); background: rgb(30, 41, 59); color: white; font-size: 15px; font-family: &quot;Noto Sans KR&quot;; outline: none; text-align: center; letter-spacing: 2px; transition: border-color 0.2s;" onfocus="this.style.borderColor='#3B82F6'" onblur="this.style.borderColor='#334155'">
-    <div id="lockErr" style="display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; color:#EF4444; font-size:12px; margin-top:10px; min-height:18px;">비밀번호가 올바르지 않습니다</div><button id="lockBtn" onclick="checkLockPw()" style="
+    <div id="lockErr" style="display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; display:none; color:#EF4444; font-size:12px; margin-top:10px; min-height:18px;">비밀번호가 올바르지 않습니다</div><button id="lockBtn" onclick="checkLockPw()" style="
       width:100%; padding:13px; margin-top:8px; background:linear-gradient(135deg,#3B82F6,#2563EB); color:white; border:none; border-radius:10px; font-size:14px; font-weight:700;
       cursor:pointer; font-family:'Noto Sans KR'; transition: opacity .15s; ">로그인</button><div style="font-size:11px; color:#475569; margin-top:20px;">🔒 암호화된 접근 제어</div></div></div>
 <script>
@@ -368,7 +368,7 @@ async function sha256(msg){ const buf = await crypto.subtle.digest('SHA-256', ne
 }
 async function checkLockPw(){ var pw = document.getElementById('lockPw').value;
   var hash = await sha256(pw);
-  if(hash === '66286d978dd7f5535a243364accafede55cd85cc522f81edc1c04306b35d4a3d'){ document.getElementById('lockScreen').style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();var ls; while(ls=document.getElementById('lockStyle')) ls.remove();document.body.style.overflow='auto';
+  if(hash === '66286d978dd7f5535a243364accafede55cd85cc522f81edc1c04306b35d4a3d'){ document.getElementById('lockScreen').style.display='none';document.getElementById('lockStyle').remove();var ls; while(ls=document.getElementById('lockStyle')) ls.remove();document.body.style.overflow='auto';
     sessionStorage.setItem('ee_auth','1');
   } else { document.getElementById('lockErr').textContent='비밀번호가 올바르지 않습니다';
     document.getElementById('lockPw').value='';
@@ -2674,9 +2674,10 @@ function generateReportShared(opts) { var date = selectedDate;
   reportHtml+='<div style="font-size:16px;font-weight:800;color:#0F172A;margin-top:4px;">'+dayStr+' '+opts.title+'</div>';
   if(opts.subtitle) reportHtml+='<div style="font-size:11px;color:#7C3AED;margin-top:4px;">'+opts.subtitle+'</div>';
   reportHtml+='</div>';
-  reportHtml+=buildSection('1. 전체 (온라인+오프라인)',null);
+  reportHtml+=buildSection('1. 전체 (온라인+오프라인+기타)',null);
   reportHtml+=buildSection('2. 온라인','온라인');
   reportHtml+=buildSection('3. 오프라인','오프라인');
+  reportHtml+=buildSection('4. 기타','기타');
   document.getElementById(opts.targetId).innerHTML=reportHtml;
 }
 function generateDailyReport(){ generateReportShared({title:'데일리 거래액 보고',gradA:'#0F172A',gradB:'#1E3A5F',targetId:'dailyReportContent'}); }
