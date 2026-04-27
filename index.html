@@ -368,7 +368,7 @@ async function sha256(msg){ const buf = await crypto.subtle.digest('SHA-256', ne
 }
 async function checkLockPw(){ var pw = document.getElementById('lockPw').value;
   var hash = await sha256(pw);
-  if(hash === '66286d978dd7f5535a243364accafede55cd85cc522f81edc1c04306b35d4a3d'){ document.getElementById('lockScreen').style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();var ls; while(ls=document.getElementById('lockStyle')) ls.remove();document.body.style.overflow='auto';
+  if(hash === '66286d978dd7f5535a243364accafede55cd85cc522f81edc1c04306b35d4a3d'){ document.getElementById('lockScreen').style.display='none';var _ls;while(_ls=document.getElementById('lockStyle'))_ls.remove();var ls; while(ls=document.getElementById('lockStyle')) ls.remove();document.body.style.overflow='auto';
     sessionStorage.setItem('ee_auth','1');
   } else { document.getElementById('lockErr').textContent='비밀번호가 올바르지 않습니다';
     document.getElementById('lockPw').value='';
@@ -377,8 +377,7 @@ async function checkLockPw(){ var pw = document.getElementById('lockPw').value;
   }
 }
 document.addEventListener('DOMContentLoaded',function(){ if(sessionStorage.getItem('ee_auth')==='1'){
-    document.getElementById('lockScreen').style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();
-  }
+    document.getElementById('lockScreen').style.display='none';var _ls;while(_ls=document.getElementById('lockStyle'))_ls.remove();document.body.style.overflow='auto';}
   document.getElementById('lockPw').addEventListener('keydown',function(e){ if(e.key==='Enter') checkLockPw();
   });
 });
@@ -419,7 +418,7 @@ document.addEventListener('DOMContentLoaded',function(){ if(sessionStorage.getIt
     <div id="acctReportContent" style="padding:24px;font-size:13px;line-height:1.8;color:#1E293B;"></div></div></div><!-- BRAND TABS --><div class="brand-tabs" style="top: 54px;">
   <button class="btab active ee" data-brand="이스트엔드"><span class="btab-dot" style="background:#0F172A;"></span>이스트엔드 (전체)
   </button></div><!-- PAGE TABS --><div class="page-tabs" style="top: 100px;"><button class="ptab active" data-page="0">① 연간 요약 + 월 누적 추이</button>
-  <button class="ptab" data-page="1">② 일자별 거래액 + 채널 분석</button><button class="ptab" data-page="2">③ 상품별 현황</button><button class="ptab" data-page="3">④ 월목표 달성 현황</button></div><div class="page active" id="page0"><div class="main">
+  <button class="ptab" data-page="1">② 일자별 거래액 + 채널 분석</button><button class="ptab" data-page="2">③ 월목표 달성 현황</button></div><div class="page active" id="page0"><div class="main">
     <div style="display:grid;grid-template-columns:1fr 280px;gap:14px;margin-bottom:14px;"><!-- 연간 진행 현황 --><div class="card" id="annual-progress-card" style="padding:20px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
           <div class="sh" style="margin-bottom:0;"><span class="sh-tag">연간</span><span class="sh-title" id="ann-prog-title">이스트엔드 연간 거래액 진행 현황</span></div>
@@ -1251,153 +1250,7 @@ document.addEventListener('DOMContentLoaded',function(){ if(sessionStorage.getIt
       <td class="r"><span class="badge bg-neutral">-</span></td>
       <td class="r">-</td>
     </tr><tr style="background:#F5F2FF;"><td colspan="2" style="font-weight:700;font-size:11px;">소계</td><td class="r" style="font-weight:700;">1천만원</td><td class="r" style="font-weight:700;">1.3억원</td><td colspan="3" style="background:#EEF7FF;"></td><td class="r" style="font-weight:700;">2.2억원</td><td class="r"><span class="badge bg-red">60%</span></td><td class="r"><span class="deficit-badge">-9천만원</span></td></tr></tbody>
-          </table></div></div></div></div></div><div class="page" id="page2"><div class="main">
-<!-- ③ 상품별 현황 -->
-<div id="product-page-container">
-  <!-- 필터바 (sticky) -->
-  <div id="prod-filter-sticky" style="position:sticky;top:134px;z-index:196;background:var(--bg);padding-top:6px;">
-  <!-- 필터바 Row 1: 기간 + 브랜드 + 거래액기준 + 정렬 -->
-  <div class="card" style="margin-bottom:10px;padding:14px 18px;">
-    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
-      <div style="display:flex;align-items:center;gap:6px;">
-        <span style="font-size:11px;font-weight:700;color:var(--text3);">기간</span>
-        <input type="date" id="prod-start-date" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;font-family:'DM Sans';">
-        <span style="font-size:11px;color:var(--text3);">~</span>
-        <input type="date" id="prod-end-date" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;font-family:'DM Sans';">
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;">
-        <span style="font-size:11px;font-weight:700;color:var(--text3);">브랜드</span>
-        <div class="chart-filter" id="prod-brand-filter"></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;">
-        <span style="font-size:11px;font-weight:700;color:var(--text3);">거래액 기준</span>
-        <div class="chart-filter" id="prod-price-filter"></div>
-      </div>
-    </div>
-  </div>
-  <!-- 필터바 Row 2: 대/중/소 카테고리 계층 필터 -->
-  <div class="card" style="margin-bottom:14px;padding:12px 18px;">
-    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
-      <div style="display:flex;align-items:center;gap:4px;">
-        <span style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px;">대분류</span>
-        <div class="chart-filter" id="prod-cat-L"></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;">
-        <span style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px;">중분류</span>
-        <div class="chart-filter" id="prod-cat-M"></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;">
-        <span style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px;">소분류</span>
-        <div class="chart-filter" id="prod-cat-S"></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;margin-left:auto;">
-        <span style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px;">검색</span>
-        <input type="text" id="prod-search" placeholder="품번/상품명 검색" style="border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;width:180px;font-family:'DM Sans',sans-serif;">
-      </div>
-    </div>
-  </div>
-  </div><!-- /prod-filter-sticky -->
-  <!-- 주차별/월별 통합 그래프 + 요약 -->
-  <div id="prod-analytics-section" style="margin-bottom:14px;">
-    <div class="card" style="padding:14px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:13px;font-weight:700;color:var(--text2);">주차별/월별 분석</span>
-          <div style="display:flex;gap:4px;" id="prod-chart-period-tabs"></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:14px;font-size:11px;" id="prod-chart-summary-bar"></div>
-      </div>
-      <div style="height:220px;position:relative;"><canvas id="prod-chart-combined"></canvas></div>
-      <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--text3);" id="prod-chart-detail-bar"></div>
-      <div style="text-align:center;margin-top:4px;font-size:10px;color:var(--text3);">차트 더블클릭 → 온라인/오프라인 비교 팝업</div>
-    </div>
-  </div>
-  <!-- 온라인/오프라인 비교 팝업 모달 -->
-  <div id="prod-compare-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;background:rgba(0,0,0,.45);align-items:center;justify-content:center;">
-    <div style="background:white;border-radius:16px;padding:24px;width:90%;max-width:900px;max-height:85vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2);position:relative;">
-      <button onclick="document.getElementById('prod-compare-modal').style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove()" style="position:absolute;top:12px;right:16px;border:none;background:none;font-size:20px;cursor:pointer;color:var(--text3);">✕</button>
-      <div id="prod-compare-content"></div>
-    </div>
-  </div>
-  <!-- 상품 랭킹 테이블 -->
-  <div class="card" style="padding:0;">
-    <div style="padding:14px 18px 8px;display:flex;justify-content:space-between;align-items:center;">
-      <div class="sh" style="margin-bottom:0;"><span class="sh-tag">상품별</span><span class="sh-title" id="prod-table-title">상품 랭킹</span></div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:11px;color:var(--text3);" id="prod-table-count"></span>
-        <button id="prod-col-filter-reset" style="display:none;font-size:10px;padding:3px 8px;border:1px solid #3B82F6;border-radius:6px;background:#EFF6FF;color:#3B82F6;cursor:pointer;font-family:inherit;font-weight:600;" onclick="prodState.colFilters={};prodState.expanded={};renderProductPage();">필터 초기화</button>
-      </div>
-    </div>
-    <div class="tbl-wrap" style="max-height:600px;overflow-y:auto;">
-      <table class="tbl" id="prod-table">
-        <thead><tr>
-          <th style="width:40px;" class="c">#</th>
-          <th class="prod-filterable" data-col="pumbun" data-type="text">품번 <span class="col-filter-icon">▼</span></th>
-          <th class="prod-filterable" data-col="name" data-type="text">상품명 <span class="col-filter-icon">▼</span></th>
-          <th class="c" style="width:80px;"></th>
-          <th class="r prod-filterable" data-col="stockIn" data-type="num">입고 <span class="col-filter-icon">▼</span></th>
-          <th class="r prod-filterable" data-col="totalSold" data-type="num">연간 판매 수량 <span class="col-filter-icon">▼</span></th>
-          <th class="r prod-filterable" data-col="currentStock" data-type="num">현재고 <span class="col-filter-icon">▼</span></th>
-          <th class="r prod-filterable" data-col="salesRate" data-type="num">판매율 <span class="col-filter-icon">▼</span></th>
-          <th class="r prod-filterable" data-col="periodSold" data-type="num">기간 판매 수량 <span class="col-filter-icon">▼</span></th>
-          <th class="r prod-filterable" data-col="amount" data-type="num" id="prod-th-amount">거래액 <span class="col-filter-icon">▼</span></th>
-          <th class="r prod-filterable" data-col="discRate" data-type="num">할인율 <span class="col-filter-icon">▼</span></th>
-          <th class="r prod-filterable" data-col="wos" data-type="num">재고주수 <span class="col-filter-icon">▼</span></th>
-          <th class="r prod-filterable" data-col="wowRate" data-type="num">등락률 <span class="col-filter-icon">▼</span></th>
-        </tr></thead>
-        <tbody id="prod-table-body"></tbody>
-      </table>
-    </div>
-  </div>
-  <!-- 주차별 추이 모달 -->
-  <!-- 옵션 모달 -->
-  <div id="prod-option-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,0.5);z-index:500;overflow-y:auto;">
-    <div style="max-width:960px;margin:40px auto;background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden;">
-      <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-        <div id="prod-option-header"></div>
-        <button onclick="document.getElementById('prod-option-modal').style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);">✕</button>
-      </div>
-      <div style="padding:20px 24px;">
-        <div id="prod-option-summary" style="margin-bottom:12px;"></div>
-        <div class="tbl-wrap"><table class="tbl" id="prod-option-table"></table></div>
-      </div>
-    </div>
-  </div>
-  <!-- 현재고 모달 -->
-  <div id="prod-stock-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,0.5);z-index:500;overflow-y:auto;">
-    <div style="max-width:800px;margin:40px auto;background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden;">
-      <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-        <div id="prod-stock-header"></div>
-        <button onclick="document.getElementById('prod-stock-modal').style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);">✕</button>
-      </div>
-      <div style="padding:20px 24px;" id="prod-stock-body"></div>
-    </div>
-  </div>
-  <div id="prod-weekly-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,0.5);z-index:500;overflow-y:auto;">
-    <div style="max-width:900px;margin:40px auto;background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden;">
-      <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-        <div id="prod-modal-header"></div>
-        <button onclick="document.getElementById('prod-weekly-modal').style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);">✕</button>
-      </div>
-      <div style="padding:20px 24px;">
-        <div id="prod-modal-summary" style="margin-bottom:16px;"></div>
-        <div style="height:300px;margin-bottom:16px;"><canvas id="prod-weekly-chart"></canvas></div>
-        <div class="tbl-wrap">
-          <table class="tbl" id="prod-weekly-table">
-            <thead><tr>
-              <th>주차</th>
-              <th class="r">판매수량</th>
-              <th class="r" id="prod-weekly-amt-th">거래액</th>
-              <th class="r">주간 평균할인율</th>
-            </tr></thead>
-            <tbody id="prod-weekly-body"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-</div></div><div class="page" id="page3"><div class="main"><!-- 전체 요약 바 + 누적 요약 + 브랜드 차트 --><div class="g2"><div class="card">
+          </table></div></div></div></div></div><div class="page" id="page2"><div class="main"><!-- 전체 요약 바 + 누적 요약 + 브랜드 차트 --><div class="g2"><div class="card">
         <div class="sh" style="display:flex;justify-content:space-between;align-items:center;"><div><span class="sh-tag">전체</span><span class="sh-title">월별 달성율</span></div>
           <div class="chart-filter" id="p2-filter"></div></div><div id="p2-cumul-summary" style="margin-bottom:10px;"></div><div id="p2-bars-all"></div></div><div class="card">
         <div class="sh"><span class="sh-tag">브랜드별</span><span class="sh-title">월별 거래액 비중</span></div><div class="cw" style="height:280px;"><canvas id="c-monthly-brand"></canvas></div></div></div>
@@ -2615,7 +2468,7 @@ const fileInput=document.getElementById('fileInput');
 const uploadLog=document.getElementById('uploadLog');
 const confirmBtn=document.getElementById('confirmApply');
 document.getElementById('openUpload').addEventListener('click',async ()=>{ modalOverlay.classList.add('open');
-  uploadLog.style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove(); uploadLog.innerHTML='';
+  uploadLog.style.display='none';var _ls;while(_ls=document.getElementById('lockStyle'))_ls.remove();uploadLog.innerHTML='';
   confirmBtn.disabled=true; confirmBtn.textContent='데이터 적용';
   dropZone.querySelector('.drop-zone-text').textContent='엑셀 파일을 드래그하거나 클릭하여 선택';
   pendingRevert=null;
@@ -2762,10 +2615,8 @@ document.getElementById('openDailyReport').addEventListener('click', function(){
   var ov = document.getElementById('dailyReportOverlay');
   ov.style.display='flex';
 });
-document.getElementById('closeDailyReport').addEventListener('click', function(){ document.getElementById('dailyReportOverlay').style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();
-});
-document.getElementById('dailyReportOverlay').addEventListener('click', function(e){ if(e.target===this) this.style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();
-});
+document.getElementById('closeDailyReport').addEventListener('click', function(){ document.getElementById('dailyReportOverlay').style.display='none';var _ls;while(_ls=document.getElementById('lockStyle'))_ls.remove();});
+document.getElementById('dailyReportOverlay').addEventListener('click', function(e){ if(e.target===this) this.style.display='none';var _ls;while(_ls=document.getElementById('lockStyle'))_ls.remove();});
 document.getElementById('copyDailyReport').addEventListener('click', function(){ var el = document.getElementById('dailyReportContent');
   var text = el.innerText;
   navigator.clipboard.writeText(text).then(function(){ showToast('클립보드에 복사되었습니다!','success');
@@ -2838,10 +2689,8 @@ document.getElementById('openAcctReport').addEventListener('click', function(){ 
   var ov = document.getElementById('acctReportOverlay');
   ov.style.display='flex';
 });
-document.getElementById('closeAcctReport').addEventListener('click', function(){ document.getElementById('acctReportOverlay').style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();
-});
-document.getElementById('acctReportOverlay').addEventListener('click', function(e){ if(e.target===this) this.style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();
-});
+document.getElementById('closeAcctReport').addEventListener('click', function(){ document.getElementById('acctReportOverlay').style.display='none';var _ls;while(_ls=document.getElementById('lockStyle'))_ls.remove();});
+document.getElementById('acctReportOverlay').addEventListener('click', function(e){ if(e.target===this) this.style.display='none';var _ls;while(_ls=document.getElementById('lockStyle'))_ls.remove();});
 document.getElementById('copyAcctReport').addEventListener('click', function(){ var el = document.getElementById('acctReportContent');
   var text = el.innerText;
   navigator.clipboard.writeText(text).then(function(){ showToast('클립보드에 복사되었습니다!','success');
@@ -3665,7 +3514,7 @@ function prodShowComparePopup(rows){
   },100);
 }
 /* 모달 외부 클릭 닫기 */
-document.addEventListener('click',function(e){ var m=document.getElementById('prod-compare-modal'); if(m&&m.style.display==='flex'&&e.target===m) m.style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove(); });
+document.addEventListener('click',function(e){ var m=document.getElementById('prod-compare-modal'); if(m&&m.style.display==='flex'&&e.target===m) m.style.display='none';var _ls;while(_ls=document.getElementById('lockStyle'))_ls.remove();});
 
 /* ── 메인 테이블 ── */
 function prodRenderTable(rows, startD, endD){
@@ -3938,7 +3787,7 @@ function prodShowWeekly(pumbun){
   var allDateKeysGlobal=Object.keys(globalDailyMap).sort();
   var allDateKeysFiltered=Object.keys(dailyMap).sort();
   var allDateKeys=Object.keys(Object.assign({},globalDailyMap,dailyMap)).sort();
-  if(!allDateKeys.length){ modal.style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove(); return; }
+  if(!allDateKeys.length){ modal.style.display='none';var _ls;while(_ls=document.getElementById('lockStyle'))_ls.remove();return; }
   var year=parseInt(allDateKeys[0].substring(0,4));
   var weekMap={};
   allDateKeys.forEach(function(d){
@@ -4030,8 +3879,7 @@ function prodShowWeekly(pumbun){
 /* 모달 외부 클릭으로 닫기 */
 document.addEventListener('click',function(e){
   var modal=document.getElementById('prod-weekly-modal');
-  if(modal && modal.style.display==='block' && e.target===modal) modal.style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();
-});
+  if(modal && modal.style.display==='block' && e.target===modal) modal.style.display='none';var _ls;while(_ls=document.getElementById('lockStyle'))_ls.remove();});
 
 /* ── 메인 렌더 함수 ── */
 function renderProductPage(){
@@ -4367,8 +4215,7 @@ function prodShowTextFilter(thEl, col){
       items.forEach(function(item){
         var v=item.getAttribute('data-val').toUpperCase();
         if(!q||v.indexOf(q)>=0){ item.style.display=''; cnt++; }
-        else item.style.display='none';document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();document.getElementById('lockStyle').remove();
-      });
+        else item.style.display='none';var _ls;while(_ls=document.getElementById('lockStyle'))_ls.remove();});
       document.getElementById('cfp-count-'+col).textContent=cnt+'개 항목';
     });
     /* Enter → 검색결과만 선택 후 즉시 적용 */
@@ -4567,4 +4414,4 @@ function prodShowNumFilter(thEl, col){
   });
 }
 </script>
-<script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script><script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script><script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script><script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script><script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script><script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script><script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script><script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script><script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script><script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script><script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script><script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script><script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script></body></html>
+<script>addEventListener("DOMContentLoaded",function(){var ls=document.getElementById("lockStyle");if(ls&&document.getElementById("lockScreen").style.display==="none")ls.remove();setTimeout(function(){var ls2=document.getElementById("lockStyle");if(ls2)ls2.remove();},500);})</script></body></html>
