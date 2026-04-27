@@ -2330,8 +2330,7 @@ function renderPage2() { var brand = selectedBrand;
 }
 function renderPage(p) { if(p===0) renderPage0();
   else if(p===1) renderPage1();
-  else if(p===2) renderProductPage();
-  else if(p===3) renderPage2();
+  else if(p===2) renderPage2();
 }
 function renderAll() { const sd = startDate, ed = selectedDate;
   if(sd === ed) { document.getElementById('dateDisplay').textContent = korDate(ed);
